@@ -3,7 +3,10 @@ import react from '@vitejs/plugin-react';
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  base: '/IoT-Simulation-and-Monitoring-System/',
+  // Relative base: emits ./assets/... so the build resolves under any subpath and
+  // survives a repository rename. The app is a single page with no router, so
+  // relative asset resolution is safe here.
+  base: './',
   plugins: [react()],
   optimizeDeps: {
     exclude: ['lucide-react'],

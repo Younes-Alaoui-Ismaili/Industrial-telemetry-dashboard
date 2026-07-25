@@ -1,15 +1,15 @@
-# IoT Simulation and Monitoring System
+# Industrial Telemetry Dashboard
 
 > A front-end IoT monitoring dashboard built with React, TypeScript and Vite, driven by a self-contained simulated data layer.
 
-[![CI](https://github.com/Younes-Alaoui-Ismaili/IoT-Simulation-and-Monitoring-System/actions/workflows/ci.yml/badge.svg)](https://github.com/Younes-Alaoui-Ismaili/IoT-Simulation-and-Monitoring-System/actions/workflows/ci.yml)
+[![CI](https://github.com/Younes-Alaoui-Ismaili/Industrial-telemetry-dashboard/actions/workflows/ci.yml/badge.svg)](https://github.com/Younes-Alaoui-Ismaili/Industrial-telemetry-dashboard/actions/workflows/ci.yml)
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Status](https://img.shields.io/badge/status-prototype-blue)
 ![React](https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white)
 ![Vite](https://img.shields.io/badge/Vite-5-646CFF?logo=vite&logoColor=white)
 
-**[Live demo](https://younes-alaoui-ismaili.github.io/IoT-Simulation-and-Monitoring-System/)**
+**[Live demo](https://younes-alaoui-ismaili.github.io/Industrial-telemetry-dashboard/)**
 
 A single-page dashboard that visualizes live device telemetry (temperature, humidity, power, signal) in real-time line charts. Instead of a backend, it ships a **simulated data layer**: a React hook generates and mutates device metrics on a fixed tick, which keeps the project fully self-contained and runnable with a single command, and makes it an easy base to later swap for a real data source (WebSocket, REST, or a message stream).
 
