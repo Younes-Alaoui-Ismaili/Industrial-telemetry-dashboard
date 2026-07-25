@@ -13,6 +13,9 @@
     "moduleDetection": "force",
     "noEmit": true,
     "jsx": "react-jsx",
+    /* The Tailwind config is plain JS and is imported by a test that guards the
+       palette against drift. */
+    "allowJs": true,
 
     /* Linting */
     "strict": true,

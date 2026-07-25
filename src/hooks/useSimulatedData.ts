@@ -1,170 +1,172 @@
-import { useState, useEffect, useCallback } from 'react';
-import { Device, Alert, MetricData, AuditLog } from '../types';
+/**
+ * Simulated fleet data source.
+ *
+ * Owns the live values, the rolling history and the alarm list, and advances them
+ * on a fixed tick. Readings are a bounded random walk around each metric's nominal
+ * value, tight enough that a healthy machine never trips a limit on noise alone,
+ * so any alarm on screen is one somebody caused.
+ *
+ * `injectFault` is what makes the dashboard demonstrable: it drives one metric
+ * past its alarm limit for a bounded window, which raises a real alarm through the
+ * same code path as any other threshold crossing. Nothing about the alarm is faked.
+ */
+
+import { useCallback, useEffect, useRef, useState } from 'react';
+import type { Alarm, Asset, AuditLog, History, MetricKey, MetricSpec } from '../types';
+import { FAULT_DURATION_MS, FLEET, HISTORY_LENGTH, TICK_MS } from '../constants/fleet';
+import { acknowledge as acknowledgeAlarm, reconcileAlarms } from '../lib/alarms';
+import { hasLimits } from '../lib/thresholds';
+
+interface ActiveFault {
+  assetId: string;
+  metric: MetricKey;
+  until: number;
+}
+
+function seedAssets(now: number): Asset[] {
+  return FLEET.map((spec) => {
+    const values: Partial<Record<MetricKey, number>> = {};
+    for (const metric of spec.metrics) values[metric.key] = metric.nominal;
+    return { spec, state: 'running', values, lastSeen: now };
+  });
+}
+
+/** Bounded random walk that pulls back toward nominal so values never drift away. */
+function walk(current: number, spec: MetricSpec): number {
+  if (spec.counter) return current + Math.max(1, Math.round(spec.jitter * Math.random()));
+  const pull = (spec.nominal - current) * 0.25;
+  const noise = (Math.random() * 2 - 1) * spec.jitter;
+  return current + pull + noise;
+}
+
+/** Value that sits clearly past the alarm limit, used while a fault is active. */
+function faultValue(spec: MetricSpec): number {
+  const limit = spec.alarm ?? spec.warn;
+  if (limit === undefined) return spec.nominal;
+  const overshoot = Math.max(Math.abs(limit) * 0.08, spec.jitter * 4);
+  return limit + overshoot + Math.random() * spec.jitter;
+}
+
+/** First metric on an asset that actually has a limit to cross. */
+function faultableMetric(assetId: string): MetricSpec | undefined {
+  const spec = FLEET.find((a) => a.id === assetId);
+  return spec?.metrics.find(hasLimits);
+}
 
 export function useSimulatedData() {
-  const [devices, setDevices] = useState<Device[]>([]);
-  const [alerts, setAlerts] = useState<Alert[]>([]);
-  const [metrics, setMetrics] = useState<Record<string, MetricData[]>>({});
+  const [assets, setAssets] = useState<Asset[]>(() => seedAssets(Date.now()));
+  const [alarms, setAlarms] = useState<Alarm[]>([]);
+  const [history, setHistory] = useState<History>({});
   const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
+  const [lastUpdate, setLastUpdate] = useState<number>(() => Date.now());
 
-  const addAuditLog = useCallback((
-    action: string,
-    resource: string,
-    resourceId: string,
-    details: Record<string, unknown>
-  ) => {
-    setAuditLogs(prev => [
-      {
-        id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-        userId: 'local-user',
-        action,
-        resource,
-        resourceId,
-        timestamp: new Date().toISOString(),
-        details
-      },
-      ...prev
-    ]);
+  // Faults live in a ref so changing them never restarts the interval.
+  const faultsRef = useRef<ActiveFault[]>([]);
+
+  const addAuditLog = useCallback(
+    (action: string, resource: string, resourceId: string, details: Record<string, unknown>) => {
+      setAuditLogs((prev) => [
+        {
+          id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+          userId: 'local-user',
+          action,
+          resource,
+          resourceId,
+          timestamp: new Date().toISOString(),
+          details,
+        },
+        ...prev,
+      ]);
+    },
+    [],
+  );
+
+  const acknowledge = useCallback(
+    (alarmId: string) => {
+      setAlarms((prev) => acknowledgeAlarm(prev, alarmId, Date.now()));
+      addAuditLog('acknowledge', 'alarm', alarmId, { acknowledged: true });
+    },
+    [addAuditLog],
+  );
+
+  const injectFault = useCallback(
+    (assetId: string, metric?: MetricKey) => {
+      const spec = metric
+        ? FLEET.find((a) => a.id === assetId)?.metrics.find((m) => m.key === metric && hasLimits(m))
+        : faultableMetric(assetId);
+      if (!spec) return;
+
+      faultsRef.current = [
+        ...faultsRef.current.filter((f) => !(f.assetId === assetId && f.metric === spec.key)),
+        { assetId, metric: spec.key, until: Date.now() + FAULT_DURATION_MS },
+      ];
+      addAuditLog('inject', 'fault', assetId, { metric: spec.key });
+    },
+    [addAuditLog],
+  );
+
+  const clearFaults = useCallback(() => {
+    faultsRef.current = [];
   }, []);
 
-  const acknowledgeAlert = useCallback((alertId: string) => {
-    setAlerts(prev =>
-      prev.map(alert =>
-        alert.id === alertId
-          ? { ...alert, acknowledged: true }
-          : alert
-      )
-    );
-    addAuditLog('update', 'alert', alertId, { acknowledged: true });
-  }, [addAuditLog]);
-
-  // Seed the simulated devices once
+  // A single interval drives the whole simulation. Every update is functional, so
+  // the effect never depends on the state it writes and the timer is never reset.
   useEffect(() => {
-    const initialDevices: Device[] = [
-      {
-        id: '1',
-        name: 'Temperature Sensor 1',
-        type: 'sensor',
-        status: 'online',
-        lastSeen: new Date().toISOString(),
-        location: {
-          lat: 48.8584,
-          lng: 2.2945,
-          address: 'Paris, France'
-        },
-        metrics: {
-          temperature: 22,
-          humidity: 45
-        },
-        tags: ['temperature', 'indoor', 'floor-1']
-      },
-      {
-        id: '2',
-        name: 'Power Monitor 1',
-        type: 'sensor',
-        status: 'online',
-        lastSeen: new Date().toISOString(),
-        location: {
-          lat: 51.5074,
-          lng: -0.1278,
-          address: 'London, UK'
-        },
-        metrics: {
-          power: 120,
-          signal: -65
-        },
-        tags: ['power', 'industrial']
-      }
-    ];
+    const tick = () => {
+      const now = Date.now();
+      faultsRef.current = faultsRef.current.filter((f) => f.until > now);
+      const faults = faultsRef.current;
 
-    setDevices(initialDevices);
-  }, []);
+      let advanced: Asset[] = [];
+      setAssets((prev) => {
+        advanced = prev.map((asset) => {
+          const values: Partial<Record<MetricKey, number>> = {};
+          let faulted = false;
 
-  // Seed a couple of demo alerts so the alert lifecycle is observable
-  useEffect(() => {
-    const now = new Date().toISOString();
-    setAlerts([
-      {
-        id: 'alert-temp-1',
-        deviceId: '1',
-        severity: 'high',
-        message: 'Temperature Sensor 1 exceeded its temperature threshold',
-        timestamp: now,
-        acknowledged: false
-      },
-      {
-        id: 'alert-signal-2',
-        deviceId: '2',
-        severity: 'medium',
-        message: 'Power Monitor 1 signal strength is degraded',
-        timestamp: now,
-        acknowledged: false
-      }
-    ]);
-  }, []);
+          for (const spec of asset.spec.metrics) {
+            const active = faults.some((f) => f.assetId === asset.spec.id && f.metric === spec.key);
+            const current = asset.values[spec.key] ?? spec.nominal;
+            values[spec.key] = active ? faultValue(spec) : walk(current, spec);
+            if (active) faulted = true;
+          }
 
-  // Simulate metric updates on a fixed tick
-  useEffect(() => {
-    const updateData = () => {
-      setDevices(prevDevices =>
-        prevDevices.map(device => {
-          const updatedMetrics = {
-            ...device.metrics,
-            temperature: device.metrics.temperature
-              ? Math.round(device.metrics.temperature + (Math.random() * 2 - 1))
-              : undefined,
-            humidity: device.metrics.humidity
-              ? Math.round(Math.max(0, Math.min(100, device.metrics.humidity + (Math.random() * 4 - 2))))
-              : undefined,
-            power: device.metrics.power
-              ? Math.round(device.metrics.power + (Math.random() * 10 - 5))
-              : undefined,
-            signal: device.metrics.signal
-              ? Math.round(Math.max(-100, Math.min(-30, device.metrics.signal + (Math.random() * 2 - 1))))
-              : undefined
-          };
-
-          return {
-            ...device,
-            lastSeen: new Date().toISOString(),
-            metrics: updatedMetrics
-          };
-        })
-      );
-
-      setMetrics(prevMetrics => {
-        const newMetrics = { ...prevMetrics };
-        devices.forEach(device => {
-          Object.entries(device.metrics).forEach(([key, value]) => {
-            if (value !== undefined) {
-              const metricKey = `${device.id}-${key}`;
-              const timestamp = new Date().toISOString();
-              newMetrics[metricKey] = [
-                ...(newMetrics[metricKey] || []).slice(-50),
-                {
-                  timestamp,
-                  value: Math.round(value),
-                  deviceId: device.id,
-                  metricType: key
-                }
-              ];
-            }
-          });
+          return { ...asset, state: faulted ? 'fault' : 'running', values, lastSeen: now };
         });
-        return newMetrics;
+        return advanced;
       });
+
+      setHistory((prev) => {
+        const next: History = { ...prev };
+        for (const asset of advanced) {
+          for (const spec of asset.spec.metrics) {
+            const value = asset.values[spec.key];
+            if (value === undefined) continue;
+            const key = `${asset.spec.id}:${spec.key}`;
+            next[key] = [...(next[key] ?? []), { timestamp: now, value }].slice(-HISTORY_LENGTH);
+          }
+        }
+        return next;
+      });
+
+      setAlarms((prev) => reconcileAlarms(prev, advanced, now));
+      setLastUpdate(now);
     };
 
-    const interval = setInterval(updateData, 2000);
+    const interval = setInterval(tick, TICK_MS);
     return () => clearInterval(interval);
-  }, [devices]);
+  }, []);
 
   return {
-    devices,
-    alerts,
-    metrics,
+    assets,
+    alarms,
+    history,
     auditLogs,
+    lastUpdate,
+    acknowledge,
+    injectFault,
+    clearFaults,
     addAuditLog,
-    acknowledgeAlert
   };
 }
+
+export type FleetData = ReturnType<typeof useSimulatedData>;

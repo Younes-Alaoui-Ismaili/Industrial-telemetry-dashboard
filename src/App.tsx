@@ -1,84 +1,81 @@
-import { DeviceCard } from './components/Dashboard/DeviceCard';
-import { AlertsList } from './components/Dashboard/AlertsList';
-import { MetricsChart } from './components/Dashboard/MetricsChart';
+import { useMemo, useState } from 'react';
+import { StatusBar } from './components/Dashboard/StatusBar';
+import { AssetTile } from './components/Dashboard/AssetTile';
+import { TrendChart } from './components/Dashboard/TrendChart';
+import { AlarmsPanel } from './components/Dashboard/AlarmsPanel';
 import { useSimulatedData } from './hooks/useSimulatedData';
-import { LayoutGrid, Bell } from 'lucide-react';
+import { assetLevel } from './lib/fleetStats';
+import { hasLimits } from './lib/thresholds';
 
-const metricColors = {
-  temperature: '#3B82F6',
-  humidity: '#10B981',
-  power: '#F59E0B',
-  signal: '#6366F1'
-};
-
+/**
+ * Screen layout follows the usual supervision hierarchy: the header answers "is
+ * the plant normal", the grid answers "which machine", and the trends answer "how
+ * bad and for how long". Trends focus on whichever asset is currently worst, so
+ * the detail pane follows the problem instead of needing to be steered.
+ */
 function App() {
-  const { devices, alerts, metrics, acknowledgeAlert } = useSimulatedData();
-  const activeAlerts = alerts.filter(alert => !alert.acknowledged);
+  const { assets, alarms, history, lastUpdate, acknowledge, injectFault } = useSimulatedData();
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+
+  const focus = useMemo(() => {
+    const abnormal = assets.find((a) => assetLevel(a) !== 'normal');
+    return assets.find((a) => a.spec.id === selectedId) ?? abnormal ?? assets[0];
+  }, [assets, selectedId]);
+
+  const trendMetrics = focus ? focus.spec.metrics.filter(hasLimits).slice(0, 2) : [];
 
   return (
-    <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
-      <header className="bg-white dark:bg-gray-800 shadow-md">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex justify-between items-center">
-            <div className="flex items-center">
-              <LayoutGrid className="h-8 w-8 text-blue-500 mr-2" />
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">IoT Dashboard</h1>
-            </div>
-            <div className="relative">
-              <Bell className="h-6 w-6 text-gray-600 dark:text-gray-300" />
-              {activeAlerts.length > 0 && (
-                <span className="absolute -top-1 -right-1 h-4 w-4 bg-red-500 rounded-full flex items-center justify-center text-xs text-white">
-                  {activeAlerts.length}
-                </span>
-              )}
-            </div>
-          </div>
-        </div>
-      </header>
+    <div className="min-h-screen bg-hmi-page text-hmi-primary">
+      <StatusBar assets={assets} alarms={alarms} lastUpdate={lastUpdate} />
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-2 space-y-6">
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Devices</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {devices.map(device => (
-                <DeviceCard key={device.id} device={device} />
-              ))}
-            </div>
-
-            <div className="space-y-6 mt-8">
-              <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Metrics</h2>
-              {Object.entries(metrics).map(([key, data]) => {
-                const [deviceId, metricName] = key.split('-');
-                const device = devices.find(d => d.id === deviceId);
-                return (
-                  <MetricsChart
-                    key={key}
-                    data={data}
-                    metricName={`${device?.name} - ${metricName}`}
-                    color={metricColors[metricName as keyof typeof metricColors]}
-                  />
-                );
-              })}
-            </div>
-          </div>
-
-          <div className="lg:col-span-1">
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
-              <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
-                Alerts
-                {activeAlerts.length > 0 && (
-                  <span className="ml-2 text-sm bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400 px-2 py-1 rounded-full">
-                    {activeAlerts.length} active
-                  </span>
-                )}
+      <main className="mx-auto max-w-[1600px] px-4 py-4">
+        <div className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1fr)_360px]">
+          <div className="space-y-4">
+            <section aria-label="Fleet">
+              <h2 className="mb-2 text-xs font-semibold uppercase tracking-widest text-hmi-secondary">
+                Fleet
               </h2>
-              <AlertsList
-                alerts={activeAlerts.slice().reverse()}
-                onAcknowledge={acknowledgeAlert}
-              />
-            </div>
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
+                {assets.map((asset) => (
+                  <div
+                    key={asset.spec.id}
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => setSelectedId(asset.spec.id)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        setSelectedId(asset.spec.id);
+                      }
+                    }}
+                    className="cursor-pointer focus:outline-none focus-visible:ring-1 focus-visible:ring-hmi-secondary"
+                  >
+                    <AssetTile asset={asset} history={history} onInjectFault={injectFault} />
+                  </div>
+                ))}
+              </div>
+            </section>
+
+            {focus ? (
+              <section aria-label="Trends" className="space-y-3">
+                <h2 className="text-xs font-semibold uppercase tracking-widest text-hmi-secondary">
+                  Trends
+                </h2>
+                <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
+                  {trendMetrics.map((spec) => (
+                    <TrendChart
+                      key={spec.key}
+                      assetId={focus.spec.id}
+                      spec={spec}
+                      samples={history[`${focus.spec.id}:${spec.key}`] ?? []}
+                    />
+                  ))}
+                </div>
+              </section>
+            ) : null}
           </div>
+
+          <AlarmsPanel alarms={alarms} now={lastUpdate} onAcknowledge={acknowledge} />
         </div>
       </main>
     </div>
