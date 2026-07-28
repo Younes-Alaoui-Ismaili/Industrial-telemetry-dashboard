@@ -10,6 +10,10 @@
 
 **[Live demo](https://younes-alaoui-ismaili.github.io/Industrial-telemetry-dashboard/)**
 
+![A fault injected on PRESS-01, the alarm raised, acknowledged, and cleared when the fault window closes](docs/demo.gif)
+
+72 seconds, real time, no cuts and no speed up: a healthy fleet, a fault injected on `PRESS-01`, the alarm raised on the next tick and climbing, the acknowledgement, then the return to normal when the 30 second fault window closes. Captured from the production build by `npm run capture`, one frame per simulator tick.
+
 Eight machines report temperature, vibration, pressure, speed and cycle counts. Every reading is compared against its own warning and alarm limits, and any crossing raises an alarm that tracks its own peak, duration and acknowledgement state. An **Inject fault** control on each machine drives a metric past its limit on demand, so the whole path from healthy fleet to raised alarm to acknowledgement can be demonstrated in about a minute.
 
 ## Data sources
@@ -54,7 +58,19 @@ Contrast is held to WCAG AA mechanically: `src/lib/contrast.test.ts` computes th
 
 ## Screenshots
 
-Screenshots are being regenerated for the current interface. The [live demo](https://younes-alaoui-ismaili.github.io/Industrial-telemetry-dashboard/) shows the running dashboard in the meantime.
+Full page captures of the production build, taken by the same pipeline as the animation above. The animation is cropped to the fold; these show the trend panel underneath it.
+
+**Healthy fleet.** Desaturated throughout, no colour anywhere, which is what makes an excursion impossible to miss.
+
+![Eight machines running normally, no open alarms](docs/screenshots/01-fleet-healthy.png)
+
+**Alarm raised.** `PRESS-01` past its temperature limit: the tile carries a written state and a shaped indicator as well as colour, the trend draws the warning line, the alarm line and the exceedance band, and the alarm row states the peak and the threshold it crossed.
+
+![PRESS-01 in fault with one open unacknowledged alarm](docs/screenshots/02-alarm-raised.png)
+
+**Acknowledged.** Acknowledging is a state transition, not a deletion: the alarm stays on the list until it has both cleared and been acknowledged.
+
+![The same alarm, now marked acknowledged](docs/screenshots/03-alarm-acknowledged.png)
 
 ## Features
 
@@ -133,6 +149,16 @@ npm run lint    # eslint
 The suite runs as two projects: `app` for the browser code under jsdom, and `bridge` for the Node code. Run `npm ci` inside `bridge/` once so the bridge project can resolve its dependencies. Bridge tests drive a fake child process with a real SDK server on the far end of an in memory pipe: no process is spawned and no socket is opened.
 
 Continuous integration runs lint, type check, tests and build on every push and pull request.
+
+### Regenerating the README media
+
+```bash
+npm run build                              # the capture serves dist/, not the dev server
+npx playwright-core install chromium       # one time, downloads the browser
+npm run capture                            # both the GIF and the screenshots
+```
+
+`scripts/capture.mjs` starts `vite preview`, drives the scenario in Chromium, and writes `docs/demo.gif` and `docs/screenshots/`. The encoder is pure JavaScript (`gifenc`, with `pngjs` to read the frames back), so there is no ffmpeg and nothing on PATH to install. Capture runs at one frame per 2000 ms simulator tick, plus one extra frame after each click: the trend animation is disabled and the only CSS transition is a button hover, so a higher rate would only write duplicate frames into the file. Pass `gif` or `stills` as an argument to run a single pass.
 
 ## Roadmap
 
