@@ -1,0 +1,18 @@
+{
+  "name": "telemetry-mcp-bridge",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Local bridge that speaks MCP over stdio to a telemetry server and serves its tool results to the dashboard over HTTP.",
+  "type": "module",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.29.0"
+  }
+}

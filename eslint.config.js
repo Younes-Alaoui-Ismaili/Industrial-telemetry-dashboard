@@ -24,5 +24,16 @@ export default tseslint.config(
         { allowConstantExport: true },
       ],
     },
+  },
+  // The bridge is a Node process, not browser code: plain JavaScript, Node
+  // globals, and none of the React rules above apply to it.
+  {
+    extends: [js.configs.recommended],
+    files: ['bridge/**/*.js'],
+    languageOptions: {
+      ecmaVersion: 2022,
+      sourceType: 'module',
+      globals: globals.node,
+    },
   }
 );

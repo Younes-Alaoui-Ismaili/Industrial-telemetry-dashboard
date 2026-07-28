@@ -12,6 +12,34 @@
 
 Eight machines report temperature, vibration, pressure, speed and cycle counts. Every reading is compared against its own warning and alarm limits, and any crossing raises an alarm that tracks its own peak, duration and acknowledgement state. An **Inject fault** control on each machine drives a metric past its limit on demand, so the whole path from healthy fleet to raised alarm to acknowledgement can be demonstrated in about a minute.
 
+## Data sources
+
+A selector in the header chooses where the readings come from.
+
+- **Simulated** (default). The built in simulator. Nothing to install, nothing to configure, and it is what the live demo above runs on.
+- **MCP live**. Real readings from a telemetry [MCP](https://modelcontextprotocol.io) server, reached through a small local bridge. The dashboard calls the server's own tools: `list_devices`, `get_telemetry`, `get_anomalies` and `simulate_fault`. Alarms in this mode are the ones the server detected, carrying the threshold the server itself crossed. Injecting a fault sends `simulate_fault` to the server and the readings move because the server moved them.
+
+> **MCP live works on your machine, not on the published demo.** The demo page is served over `https`, and a page served over `https` is not allowed to call `http://localhost`. That is browser mixed content policy and there is no way around it from a static site. Selecting **MCP live** on the published demo will always report the server as unavailable. To see it work, clone the repository and run it locally.
+
+### Honest degradation
+
+If the server or the bridge is not running, the dashboard does not pretend. It shows a banner naming the failure, states in words that what is on screen is simulated, and marks the header source as `SIMULATED (FALLBACK)`. Simulated readings are never presented as live ones.
+
+### Running the live mode
+
+The bridge is a separate Node package in `bridge/`. It speaks MCP over stdio to the telemetry server using the official [`@modelcontextprotocol/sdk`](https://github.com/modelcontextprotocol/typescript-sdk), and exposes what it gets on loopback so the browser can read it.
+
+```bash
+cd bridge
+npm ci
+cp .env.example .env      # then point TELEMETRY_MCP_ARGS at your telemetry server
+node --env-file=.env src/index.js
+```
+
+The bridge refuses to start without `TELEMETRY_MCP_COMMAND`, rather than guessing a path and reporting a connection failure that is really a configuration failure. No machine specific path is stored in this repository.
+
+With the bridge running, start the dashboard as usual and pick **MCP live** in the header.
+
 ## Design
 
 The screen follows the conventions of high performance industrial supervision rather than general purpose dashboard styling:
@@ -30,6 +58,7 @@ Screenshots are being regenerated for the current interface. The [live demo](htt
 
 ## Features
 
+- **Two data sources**: the built in simulator, and live readings from a telemetry MCP server through a local bridge, behind one selector and one component contract.
 - **Fleet grid**: eight machines with plant style tags, each showing state, live readings with units, and a micro trend.
 - **Status bar**: assets online, open alarms by severity, availability, and the time of the last update.
 - **Alarm lifecycle**: alarms are raised by threshold crossings and move through unacknowledged, acknowledged, and returned to normal but unacknowledged. Acknowledging is a state transition, never a deletion, so an alarm stays visible until it has both cleared and been acknowledged.
@@ -39,23 +68,31 @@ Screenshots are being regenerated for the current interface. The [live demo](htt
 
 ## Architecture
 
-Entirely client side. A single hook owns the simulation and pushes state into the component tree; all decision logic lives in pure modules that are unit tested without rendering.
+The dashboard is client side. Two hooks expose the same return shape, so the components never learn which source they are rendering; all decision logic lives in pure modules that are unit tested without rendering. Only the live mode reaches outside the browser, and it does so through a Node process that keeps the MCP client out of the bundle entirely.
 
 ```mermaid
 flowchart LR
-    Hook["useSimulatedData<br/>(2s tick, fault injection)"] --> State[App state]
-    State --> Bar[StatusBar]
+    Sim["useSimulatedData<br/>(2s tick, fault injection)"] --> State[App state]
+    Mcp["useMcpData<br/>(5s poll)"] --> State
+    State --> Bar[StatusBar + source selector]
     State --> Grid[AssetTile grid]
     State --> Trend[TrendChart]
     State --> Panel[AlarmsPanel]
-    Hook --> Lib["lib: thresholds, alarms,<br/>fleetStats, format"]
+    Sim --> Lib["lib: thresholds, alarms,<br/>fleetStats, format, mcpMapping"]
+    Mcp --> Lib
+    Mcp -. "http, loopback" .-> Bridge["bridge/ (Node)<br/>MCP client, official SDK"]
+    Bridge -. "MCP over stdio" .-> Server[["telemetry MCP server<br/>(separate process)"]]
 ```
 
 - `src/constants/fleet.ts`: the machines, their metrics, and their operating limits.
 - `src/constants/theme.ts`: the palette, mirrored in the Tailwind config and guarded against drift by a test.
-- `src/lib/`: pure logic. Threshold evaluation, the alarm lifecycle, fleet rollups, number formatting, and contrast maths.
+- `src/lib/`: pure logic. Threshold evaluation, the alarm lifecycle, fleet rollups, number formatting, contrast maths, and the translation from the server's wire shapes into the domain model.
 - `src/hooks/useSimulatedData.ts`: owns live values, rolling history and alarms, and advances them on a fixed tick.
+- `src/hooks/useMcpData.ts`: polls the bridge and reports its own connection state. Holds no data when the server is unreachable.
 - `src/components/Dashboard/`: presentational components.
+- `bridge/`: the Node side. `session.js` owns the MCP client, `telemetry.js` assembles the tool calls, `api.js` is the routing table as a pure function, `server.js` is the loopback listener.
+
+Nothing is added to the browser bundle for the live mode: the MCP SDK is a dependency of `bridge/`, which is a Node process, and the dashboard talks to it with `fetch`.
 
 ## Tech stack
 
@@ -93,13 +130,15 @@ npm run test:cov # run it with coverage
 npm run lint    # eslint
 ```
 
+The suite runs as two projects: `app` for the browser code under jsdom, and `bridge` for the Node code. Run `npm ci` inside `bridge/` once so the bridge project can resolve its dependencies. Bridge tests drive a fake child process with a real SDK server on the far end of an in memory pipe: no process is spawned and no socket is opened.
+
 Continuous integration runs lint, type check, tests and build on every push and pull request.
 
 ## Roadmap
 
-- Replace the simulated data layer with a live source, keeping the same component contract.
 - Persist fleet configuration and limits instead of defining them in code.
 - Add per asset detail views for longer history windows.
+- Reconcile the two fleets: the live source reports the four machines the telemetry server exposes, the simulator carries eight.
 
 ## License
 

@@ -3,7 +3,11 @@ import { StatusBar } from './components/Dashboard/StatusBar';
 import { AssetTile } from './components/Dashboard/AssetTile';
 import { TrendChart } from './components/Dashboard/TrendChart';
 import { AlarmsPanel } from './components/Dashboard/AlarmsPanel';
+import { SourceBanner } from './components/Dashboard/SourceBanner';
+import { SourceSelector } from './components/Dashboard/SourceSelector';
 import { useSimulatedData } from './hooks/useSimulatedData';
+import { useMcpData } from './hooks/useMcpData';
+import type { DataSourceId } from './types/mcp';
 import { assetLevel } from './lib/fleetStats';
 import { hasLimits } from './lib/thresholds';
 
@@ -12,9 +16,27 @@ import { hasLimits } from './lib/thresholds';
  * the plant normal", the grid answers "which machine", and the trends answer "how
  * bad and for how long". Trends focus on whichever asset is currently worst, so
  * the detail pane follows the problem instead of needing to be steered.
+ *
+ * Two data sources feed the same components. The simulator is the default and
+ * needs nothing installed; the live source reads a real telemetry MCP server
+ * through a local bridge. Both hooks always run, because hooks cannot be called
+ * conditionally, but the live one does no work until it is selected.
+ *
+ * When the live source is selected and not reachable, the screen keeps running
+ * on the simulator and says so twice, in the banner and in the header. It never
+ * shows simulated readings under a live label.
  */
 function App() {
-  const { assets, alarms, history, lastUpdate, acknowledge, injectFault } = useSimulatedData();
+  const [source, setSource] = useState<DataSourceId>('simulated');
+
+  const simulated = useSimulatedData();
+  const mcp = useMcpData({ enabled: source === 'mcp' });
+
+  const live = source === 'mcp' && mcp.connection.status === 'live';
+  const fallback = source === 'mcp' && !live;
+  const data = live ? mcp : simulated;
+
+  const { assets, alarms, history, lastUpdate, acknowledge, injectFault } = data;
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
   const focus = useMemo(() => {
@@ -26,7 +48,15 @@ function App() {
 
   return (
     <div className="min-h-screen bg-hmi-page text-hmi-primary">
-      <StatusBar assets={assets} alarms={alarms} lastUpdate={lastUpdate} />
+      <StatusBar
+        assets={assets}
+        alarms={alarms}
+        lastUpdate={lastUpdate}
+        sourceLabel={live ? 'MCP live' : fallback ? 'Simulated (fallback)' : 'Simulated'}
+        fallback={fallback}
+        selector={<SourceSelector value={source} onChange={setSource} />}
+      />
+      {source === 'mcp' ? <SourceBanner connection={mcp.connection} /> : null}
 
       <main className="mx-auto max-w-[1600px] px-4 py-4">
         <div className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1fr)_360px]">

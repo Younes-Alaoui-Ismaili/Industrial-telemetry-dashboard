@@ -10,8 +10,28 @@ export default defineConfig({
   plugins: [react()],
   test: {
     globals: true,
-    environment: 'jsdom',
-    setupFiles: './src/test/setup.ts',
+    // Two projects, because the two halves of this repository run in different
+    // places: the dashboard is browser code and needs jsdom, the bridge is a Node
+    // process and must not have a DOM stubbed under it. One `npm test` runs both.
+    projects: [
+      {
+        extends: true,
+        test: {
+          name: 'app',
+          include: ['src/**/*.{test,spec}.{ts,tsx}'],
+          environment: 'jsdom',
+          setupFiles: './src/test/setup.ts',
+        },
+      },
+      {
+        extends: true,
+        test: {
+          name: 'bridge',
+          include: ['bridge/test/**/*.test.js'],
+          environment: 'node',
+        },
+      },
+    ],
     coverage: {
       provider: 'v8',
       include: ['src/**/*.{ts,tsx}'],
