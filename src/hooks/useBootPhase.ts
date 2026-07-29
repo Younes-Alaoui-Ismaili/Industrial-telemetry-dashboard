@@ -15,8 +15,17 @@
 
 import { useEffect, useState } from 'react';
 
-/** Shortest time the overlay stays up, so a fast boot does not flash it. */
-export const BOOT_FLOOR_MS = 600;
+/**
+ * Shortest time the overlay stays up, so a fast boot does not flash it.
+ *
+ * Set from measurement on the production bundle rather than by taste. The
+ * overlay mounts around 95 ms after navigation and its fact is already true at
+ * that instant, the history being seeded; the trend charts finish painting
+ * around 185 ms, some 90 ms later. 250 ms covers that paint with margin, so the
+ * overlay never uncovers a half drawn screen, and it stays legible instead of
+ * flashing: with no floor at all it is on screen for about 96 ms, measured.
+ */
+export const BOOT_FLOOR_MS = 250;
 
 /** Longest the overlay can stay up, whatever the boot is doing. */
 export const BOOT_CEILING_MS = 2500;
