@@ -1,8 +1,9 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import { useSimulatedData } from './useSimulatedData';
-import { FLEET, TICK_MS } from '../constants/fleet';
+import { FLEET, HISTORY_LENGTH, TICK_MS } from '../constants/fleet';
 import { alarmState } from '../lib/alarms';
+import { evaluate } from '../lib/thresholds';
 
 describe('useSimulatedData', () => {
   beforeEach(() => {
@@ -33,22 +34,73 @@ describe('useSimulatedData', () => {
     expect(press.values.temperature).toBe(press.spec.metrics[0].nominal);
   });
 
-  // Equivalent of the original "generates metric history on each tick".
-  it('records metric history on each tick', () => {
+  /**
+   * Replaces the original "generates metric history on each tick", which asserted
+   * that history started empty and grew a point per tick. History now opens full,
+   * so counting points no longer says anything: what the tick has to do is
+   * continue the series it was handed, which is what these two assert instead.
+   */
+  it('opens with a full trend rather than an empty plot', () => {
     const { result } = renderHook(() => useSimulatedData());
-    expect(Object.keys(result.current.history)).toHaveLength(0);
+
+    expect(Object.keys(result.current.history).length).toBeGreaterThan(0);
+    expect(result.current.history['PRESS-01:temperature']).toHaveLength(HISTORY_LENGTH);
+  });
+
+  it('continues the seeded series on each tick instead of restarting it', () => {
+    const { result } = renderHook(() => useSimulatedData());
+    const seeded = result.current.history['PRESS-01:temperature'];
+    const lastSeededAt = seeded[seeded.length - 1].timestamp;
 
     act(() => {
       vi.advanceTimersByTime(TICK_MS);
     });
 
-    expect(result.current.history['PRESS-01:temperature']).toHaveLength(1);
+    const advanced = result.current.history['PRESS-01:temperature'];
+    expect(advanced).toHaveLength(HISTORY_LENGTH);
+    expect(advanced[advanced.length - 1].timestamp).toBeGreaterThan(lastSeededAt);
+  });
 
-    act(() => {
-      vi.advanceTimersByTime(TICK_MS);
-    });
+  it('stamps the seeded samples backwards at the tick interval', () => {
+    const { result } = renderHook(() => useSimulatedData());
+    const samples = result.current.history['PRESS-01:temperature'];
 
-    expect(result.current.history['PRESS-01:temperature']).toHaveLength(2);
+    for (let i = 1; i < samples.length; i += 1) {
+      expect(samples[i].timestamp - samples[i - 1].timestamp).toBe(TICK_MS);
+    }
+    // The series ends now, not in the past, so the trend meets the live tick.
+    expect(samples[samples.length - 1].timestamp).toBe(result.current.lastUpdate);
+  });
+
+  /**
+   * The seam the translation inside `seedHistory` exists to remove. `cycles` is
+   * the metric that would betray a missing translation: it only ever counts up,
+   * so an untranslated series would end above nominal and the first tick would
+   * step backwards in full view.
+   */
+  it('joins the seeded series onto the mounted reading of every metric', () => {
+    const { result } = renderHook(() => useSimulatedData());
+
+    for (const asset of result.current.assets) {
+      for (const spec of asset.spec.metrics) {
+        const samples = result.current.history[`${asset.spec.id}:${spec.key}`];
+        expect(samples[samples.length - 1].value).toBeCloseTo(asset.values[spec.key]!, 9);
+      }
+    }
+  });
+
+  // The healthy fleet guarantee has to hold over the invented past too, otherwise
+  // the demo opens on an alarm nobody caused.
+  it('keeps every seeded sample inside its operating limits', () => {
+    const { result } = renderHook(() => useSimulatedData());
+
+    for (const asset of result.current.assets) {
+      for (const spec of asset.spec.metrics) {
+        for (const sample of result.current.history[`${asset.spec.id}:${spec.key}`]) {
+          expect(evaluate(sample.value, spec)).toBe('normal');
+        }
+      }
+    }
   });
 
   it('advances the last update stamp as it ticks', () => {
