@@ -1,12 +1,15 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { StatusBar } from './components/Dashboard/StatusBar';
 import { AssetTile } from './components/Dashboard/AssetTile';
 import { TrendChart } from './components/Dashboard/TrendChart';
 import { AlarmsPanel } from './components/Dashboard/AlarmsPanel';
 import { SourceBanner } from './components/Dashboard/SourceBanner';
 import { SourceSelector } from './components/Dashboard/SourceSelector';
+import { BootOverlay } from './components/Dashboard/BootOverlay';
 import { useSimulatedData } from './hooks/useSimulatedData';
 import { useMcpData } from './hooks/useMcpData';
+import { useBootPhase } from './hooks/useBootPhase';
+import { useChartsPainted } from './hooks/useChartsPainted';
 import type { DataSourceId } from './types/mcp';
 import { assetLevel } from './lib/fleetStats';
 import { hasLimits } from './lib/thresholds';
@@ -46,8 +49,46 @@ function App() {
 
   const trendMetrics = focus ? focus.spec.metrics.filter(hasLimits).slice(0, 2) : [];
 
+  /**
+   * The fact the boot overlay waits on, per source.
+   *
+   * Simulated: the metric the trend pane is about to draw already has a sample,
+   * which the seeded history makes true on the first render.
+   *
+   * Live: the connection attempt has finished, whatever it concluded. A failed
+   * attempt is as good a reason to leave as a successful one, because the screen
+   * behind states the fallback in words; holding the overlay up until something
+   * succeeds would be waiting for an outcome that may never come.
+   */
+  const bootReady =
+    source === 'mcp'
+      ? mcp.connection.status !== 'connecting'
+      : focus !== undefined &&
+        trendMetrics.length > 0 &&
+        (history[`${focus.spec.id}:${trendMetrics[0].key}`]?.length ?? 0) > 0;
+
+  const boot = useBootPhase(bootReady);
+
+  /**
+   * The one milestone that is genuinely later than the overlay itself. The first
+   * two are true the instant it mounts, so without this the progress bar would
+   * open two thirds full and jump rather than fill.
+   */
+  const trendsRef = useRef<HTMLElement | null>(null);
+  const chartsPainted = useChartsPainted(trendsRef, boot.mounted);
+
+  const bootSteps = [
+    { label: 'Fleet definition loaded', done: assets.length > 0 },
+    {
+      label: source === 'mcp' ? 'Bridge answered' : 'Trend buffer primed',
+      done: bootReady,
+    },
+    { label: 'Trend charts drawn', done: chartsPainted },
+    { label: 'Screen ready', done: boot.leaving },
+  ];
+
   return (
-    <div className="min-h-screen bg-hmi-page text-hmi-primary">
+    <div className="min-h-screen bg-hmi-page text-hmi-primary" aria-busy={boot.mounted}>
       <StatusBar
         assets={assets}
         alarms={alarms}
@@ -87,7 +128,7 @@ function App() {
             </section>
 
             {focus ? (
-              <section aria-label="Trends" className="space-y-3">
+              <section aria-label="Trends" className="space-y-3" ref={trendsRef}>
                 <h2 className="text-xs font-semibold uppercase tracking-widest text-hmi-secondary">
                   Trends
                 </h2>
@@ -108,6 +149,15 @@ function App() {
           <AlarmsPanel alarms={alarms} now={lastUpdate} onAcknowledge={acknowledge} />
         </div>
       </main>
+
+      {boot.mounted ? (
+        <BootOverlay
+          source={source}
+          steps={bootSteps}
+          leaving={boot.leaving}
+          animated={boot.animated}
+        />
+      ) : null}
     </div>
   );
 }

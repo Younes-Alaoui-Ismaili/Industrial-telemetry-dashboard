@@ -11,6 +11,12 @@
  * There is no silent fallback in this file. When the bridge or the server is not
  * there, the hook reports `unavailable` with the reason it got and holds no
  * data at all. Substituting readings here would make the whole feature a lie.
+ *
+ * For the same reason the simulator's seeded history has no counterpart here.
+ * `useSimulatedData` opens with a full trend because inventing a plausible past
+ * for an invented machine costs nothing; doing it for a real one would put
+ * fabricated points on a plot labelled live. This history starts empty and stays
+ * empty until the server sends measurements.
  */
 
 import { useCallback, useEffect, useRef, useState } from 'react';

@@ -6,6 +6,10 @@
  * value, tight enough that a healthy machine never trips a limit on noise alone,
  * so any alarm on screen is one somebody caused.
  *
+ * History starts full rather than empty. A visitor opening the published demo
+ * would otherwise wait two seconds for the first point and two minutes for a
+ * complete trend, and read the empty plot as a broken page. See `seedHistory`.
+ *
  * `injectFault` is what makes the dashboard demonstrable: it drives one metric
  * past its alarm limit for a bounded window, which raises a real alarm through the
  * same code path as any other threshold crossing. Nothing about the alarm is faked.
@@ -39,6 +43,46 @@ function walk(current: number, spec: MetricSpec): number {
   return current + pull + noise;
 }
 
+/**
+ * The history the simulator would have accumulated had it already been running.
+ *
+ * Every point comes from `walk`, the same function the live tick uses, so the
+ * seeded stretch and the stretch that follows it are drawn from one distribution
+ * and nothing marks where they meet.
+ *
+ * The series is then translated so its last point lands exactly on the reading
+ * the asset mounts with. Without that translation a monotonic counter such as
+ * `cycles` would finish its seeded run above nominal and the first real tick
+ * would step backwards, which is precisely the visible discontinuity this is
+ * meant to avoid. Translating preserves the shape of the walk for every metric
+ * kind and costs one subtraction.
+ *
+ * Timestamps are laid backwards at `TICK_MS` intervals, so the last sample is
+ * stamped `now` and the trend is already its full width on the first frame.
+ */
+function seedHistory(now: number): History {
+  const history: History = {};
+
+  for (const asset of FLEET) {
+    for (const spec of asset.metrics) {
+      const values: number[] = [];
+      let current = spec.nominal;
+      for (let i = 0; i < HISTORY_LENGTH; i += 1) {
+        current = walk(current, spec);
+        values.push(current);
+      }
+
+      const drift = values[values.length - 1] - spec.nominal;
+      history[`${asset.id}:${spec.key}`] = values.map((value, i) => ({
+        timestamp: now - (HISTORY_LENGTH - 1 - i) * TICK_MS,
+        value: value - drift,
+      }));
+    }
+  }
+
+  return history;
+}
+
 /** Value that sits clearly past the alarm limit, used while a fault is active. */
 function faultValue(spec: MetricSpec): number {
   const limit = spec.alarm ?? spec.warn;
@@ -54,11 +98,16 @@ function faultableMetric(assetId: string): MetricSpec | undefined {
 }
 
 export function useSimulatedData() {
-  const [assets, setAssets] = useState<Asset[]>(() => seedAssets(Date.now()));
+  // One instant shared by the seeded readings, the seeded history and the first
+  // update stamp. Calling Date.now() separately per state would date the last
+  // seeded sample a few milliseconds off the clock the header shows.
+  const [mountedAt] = useState(() => Date.now());
+
+  const [assets, setAssets] = useState<Asset[]>(() => seedAssets(mountedAt));
   const [alarms, setAlarms] = useState<Alarm[]>([]);
-  const [history, setHistory] = useState<History>({});
+  const [history, setHistory] = useState<History>(() => seedHistory(mountedAt));
   const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
-  const [lastUpdate, setLastUpdate] = useState<number>(() => Date.now());
+  const [lastUpdate, setLastUpdate] = useState<number>(mountedAt);
 
   // Faults live in a ref so changing them never restarts the interval.
   const faultsRef = useRef<ActiveFault[]>([]);
