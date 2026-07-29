@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { StatusBar } from './components/Dashboard/StatusBar';
 import { AssetTile } from './components/Dashboard/AssetTile';
 import { TrendChart } from './components/Dashboard/TrendChart';
@@ -9,6 +9,7 @@ import { BootOverlay } from './components/Dashboard/BootOverlay';
 import { useSimulatedData } from './hooks/useSimulatedData';
 import { useMcpData } from './hooks/useMcpData';
 import { useBootPhase } from './hooks/useBootPhase';
+import { useChartsPainted } from './hooks/useChartsPainted';
 import type { DataSourceId } from './types/mcp';
 import { assetLevel } from './lib/fleetStats';
 import { hasLimits } from './lib/thresholds';
@@ -68,12 +69,21 @@ function App() {
 
   const boot = useBootPhase(bootReady);
 
+  /**
+   * The one milestone that is genuinely later than the overlay itself. The first
+   * two are true the instant it mounts, so without this the progress bar would
+   * open two thirds full and jump rather than fill.
+   */
+  const trendsRef = useRef<HTMLElement | null>(null);
+  const chartsPainted = useChartsPainted(trendsRef, boot.mounted);
+
   const bootSteps = [
     { label: 'Fleet definition loaded', done: assets.length > 0 },
     {
       label: source === 'mcp' ? 'Bridge answered' : 'Trend buffer primed',
       done: bootReady,
     },
+    { label: 'Trend charts drawn', done: chartsPainted },
     { label: 'Screen ready', done: boot.leaving },
   ];
 
@@ -118,7 +128,7 @@ function App() {
             </section>
 
             {focus ? (
-              <section aria-label="Trends" className="space-y-3">
+              <section aria-label="Trends" className="space-y-3" ref={trendsRef}>
                 <h2 className="text-xs font-semibold uppercase tracking-widest text-hmi-secondary">
                   Trends
                 </h2>

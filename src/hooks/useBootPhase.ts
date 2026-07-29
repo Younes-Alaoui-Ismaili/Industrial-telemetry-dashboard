@@ -16,19 +16,26 @@
 import { useEffect, useState } from 'react';
 
 /**
- * Shortest time the overlay stays up, so a fast boot does not flash it.
+ * Shortest time the overlay stays up.
  *
- * Set from measurement on the production bundle rather than by taste. The
- * overlay mounts around 95 ms after navigation and its fact is already true at
- * that instant, the history being seeded; the trend charts finish painting
- * around 185 ms, some 90 ms later. 250 ms covers that paint with margin, so the
- * overlay never uncovers a half drawn screen, and it stays legible instead of
- * flashing: with no floor at all it is on screen for about 96 ms, measured.
+ * This is a legibility bound, not a machine one. The boot itself is finished
+ * long before: the overlay mounts around 95 ms with its fact already true, the
+ * history being seeded, and the charts finish painting around 190 ms. What the
+ * floor buys is a human being able to read a sentence, watch a bar fill and see
+ * a counter move, which is the whole point of the overlay. Measured display time
+ * is floor plus fade plus about 95 ms of scheduling, so this puts the overlay on
+ * screen for roughly 1.9 s.
  */
-export const BOOT_FLOOR_MS = 250;
+export const BOOT_FLOOR_MS = 1500;
 
-/** Longest the overlay can stay up, whatever the boot is doing. */
-export const BOOT_CEILING_MS = 2500;
+/**
+ * Longest the overlay can stay up, whatever the boot is doing.
+ *
+ * A guard against a fact that never arrives, nothing else. It has to stay well
+ * clear of the nominal display time, or it stops being a guard and silently
+ * becomes the rule; a test asserts that ordering so the two cannot drift apart.
+ */
+export const BOOT_CEILING_MS = 4000;
 
 /** Fade out, matched by the duration class in BootOverlay. */
 export const BOOT_FADE_MS = 300;

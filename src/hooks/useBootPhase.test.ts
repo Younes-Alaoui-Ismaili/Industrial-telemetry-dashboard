@@ -10,6 +10,18 @@ function stubReducedMotion(reduce: boolean) {
   );
 }
 
+/**
+ * The two bounds are set independently, one for legibility and one as a guard,
+ * so nothing but a test stops a later change to either from making the guard the
+ * rule. Raising the floor past the ceiling would mean every boot hit the ceiling
+ * and the fact the overlay waits on stopped mattering at all.
+ */
+describe('boot bounds', () => {
+  it('keeps the ceiling clear of the nominal display time', () => {
+    expect(BOOT_CEILING_MS).toBeGreaterThan(BOOT_FLOOR_MS + BOOT_FADE_MS);
+  });
+});
+
 describe('useBootPhase', () => {
   beforeEach(() => {
     vi.useFakeTimers();
