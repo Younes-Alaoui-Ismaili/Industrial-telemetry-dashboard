@@ -1,3 +1,5 @@
+![Industrial telemetry dashboard banner](docs/banner.jpg)
+
 # Industrial Telemetry Dashboard
 
 > A supervision screen for a fleet of industrial machines: live readings against operating limits, threshold driven alarms with a real lifecycle, and a self contained data simulator so it runs with one command.
