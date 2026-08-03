@@ -174,13 +174,13 @@ function App() {
 
             {assets.length > 0 ? (
               <section aria-label="Fleet critical trends" className="space-y-3" ref={trendsRef}>
-                <div>
+                <div className="flex items-baseline justify-between gap-3">
                   <h2 className="text-xs font-semibold uppercase tracking-widest text-hmi-secondary">
                     Fleet critical trends
                   </h2>
-                  <p className="mt-0.5 text-xs text-hmi-muted">
-                    The two metrics closest to their limits, across the whole fleet. Open a machine
-                    for all of its trends.
+                  <p className="truncate text-xs text-hmi-muted">
+                    The two metrics closest to their limits, fleet wide. Open a machine for all of
+                    its trends.
                   </p>
                 </div>
                 <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
