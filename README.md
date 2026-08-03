@@ -76,6 +76,8 @@ Full page captures of the production build, taken by the same pipeline as the an
 
 - **Two data sources**: the built in simulator, and live readings from a telemetry MCP server through a local bridge, behind one selector and one component contract.
 - **Fleet grid**: eight machines with plant style tags, each showing state, live readings with units, and a micro trend.
+- **Asset faceplate**: click any machine for a dialog over the running screen, carrying a full trend for every metric it has with its warning and alarm limits, plus that machine's alarms. The grid stays an overview; nothing about one machine is left unreachable.
+- **Fleet critical trends**: a fixed pane showing the two metrics closest to their limits across the whole fleet, coupled to no selection.
 - **Status bar**: assets online, open alarms by severity, availability, and the time of the last update.
 - **Alarm lifecycle**: alarms are raised by threshold crossings and move through unacknowledged, acknowledged, and returned to normal but unacknowledged. Acknowledging is a state transition, never a deletion, so an alarm stays visible until it has both cleared and been acknowledged.
 - **Fault injection**: force a metric past its alarm limit for a bounded window to demonstrate the alarm path end to end.
@@ -94,15 +96,18 @@ flowchart LR
     State --> Grid[AssetTile grid]
     State --> Trend[TrendChart]
     State --> Panel[AlarmsPanel]
-    Sim --> Lib["lib: thresholds, alarms,<br/>fleetStats, format, mcpMapping"]
+    Grid -- "click" --> Face["AssetFaceplate<br/>(dialog, every metric)"]
+    State --> Face
+    Sim --> Lib["lib: thresholds, alarms,<br/>fleetStats, format, mcpMapping,<br/>trendPriority"]
     Mcp --> Lib
+    State --> Lib
     Mcp -. "http, loopback" .-> Bridge["bridge/ (Node)<br/>MCP client, official SDK"]
     Bridge -. "MCP over stdio" .-> Server[["telemetry MCP server<br/>(separate process)"]]
 ```
 
 - `src/constants/fleet.ts`: the machines, their metrics, and their operating limits.
 - `src/constants/theme.ts`: the palette, mirrored in the Tailwind config and guarded against drift by a test.
-- `src/lib/`: pure logic. Threshold evaluation, the alarm lifecycle, fleet rollups, number formatting, contrast maths, and the translation from the server's wire shapes into the domain model.
+- `src/lib/`: pure logic. Threshold evaluation, the alarm lifecycle, fleet rollups, which trends are the fleet's most critical, number formatting, contrast maths, and the translation from the server's wire shapes into the domain model.
 - `src/hooks/useSimulatedData.ts`: owns live values, rolling history and alarms, and advances them on a fixed tick.
 - `src/hooks/useMcpData.ts`: polls the bridge and reports its own connection state. Holds no data when the server is unreachable.
 - `src/components/Dashboard/`: presentational components.
@@ -163,7 +168,7 @@ npm run capture                            # both the GIF and the screenshots
 ## Roadmap
 
 - Persist fleet configuration and limits instead of defining them in code.
-- Add per asset detail views for longer history windows.
+- Extend the asset faceplate with longer history windows.
 - Reconcile the two fleets: the live source reports the four machines the telemetry server exposes, the simulator carries eight.
 
 ## License
