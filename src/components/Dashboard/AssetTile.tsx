@@ -5,6 +5,10 @@
  * trend, all readable without interaction. The left edge takes a status colour
  * only when something is abnormal, so a healthy grid is quiet and an excursion is
  * the only coloured thing on screen.
+ *
+ * The tile is also the way into that machine's faceplate, so the whole surface
+ * is a click target. Injecting a fault is the one thing on it that is not that,
+ * and it says so by stopping the click from travelling any further.
  */
 
 import type { Asset, History, MetricLevel } from '../../types';
@@ -38,7 +42,7 @@ export function AssetTile({ asset, history, onInjectFault }: AssetTileProps) {
 
   return (
     <article
-      className={`border border-hmi-grid border-l-2 bg-hmi-panel p-3 ${edge[level]}`}
+      className={`border border-hmi-grid border-l-2 bg-hmi-panel p-3 transition-colors hover:bg-hmi-raised ${edge[level]}`}
       aria-label={`${asset.spec.id} ${asset.spec.name}`}
     >
       <header className="mb-2 flex items-start justify-between gap-2">
@@ -77,7 +81,10 @@ export function AssetTile({ asset, history, onInjectFault }: AssetTileProps) {
 
       <button
         type="button"
-        onClick={() => onInjectFault(asset.spec.id)}
+        onClick={(e) => {
+          e.stopPropagation();
+          onInjectFault(asset.spec.id);
+        }}
         className="mt-3 w-full border border-hmi-axis px-2 py-1 text-xs uppercase tracking-wider text-hmi-secondary transition-colors hover:bg-hmi-raised focus:outline-none focus-visible:ring-1 focus-visible:ring-hmi-secondary"
       >
         Inject fault

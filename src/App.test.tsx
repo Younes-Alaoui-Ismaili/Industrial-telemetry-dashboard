@@ -255,4 +255,177 @@ describe('App', () => {
       expect(screen.getAllByRole('article')).toHaveLength(8);
     });
   });
+
+  /**
+   * The display hierarchy. The grid stays an overview and every metric of a
+   * machine is one click away, rather than two of them being on screen and the
+   * rest nowhere.
+   */
+  describe('asset faceplate', () => {
+    const openPress = () => {
+      const card = screen.getByRole('button', { name: /PRESS-01/ });
+      fireEvent.click(card);
+      return card;
+    };
+
+    it('opens on a card and draws every metric of that machine', () => {
+      render(<App />);
+      openPress();
+
+      const dialog = screen.getByRole('dialog', { name: 'PRESS-01 faceplate' });
+      expect(dialog).toHaveAttribute('aria-modal', 'true');
+      for (const name of ['Temp', 'Vibration', 'Pressure', 'Cycles']) {
+        expect(
+          within(dialog).getByRole('region', { name: `PRESS-01 ${name} trend` }),
+        ).toBeInTheDocument();
+      }
+      expect(within(dialog).getAllByRole('region', { name: /trend$/ })).toHaveLength(4);
+    });
+
+    it('adds no machine to the fleet count while it is open', () => {
+      render(<App />);
+      openPress();
+
+      expect(screen.getAllByRole('article')).toHaveLength(8);
+    });
+
+    it('closes on Escape and hands focus back to the card that opened it', () => {
+      render(<App />);
+      const card = openPress();
+
+      fireEvent.keyDown(document, { key: 'Escape' });
+
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+      expect(card).toHaveFocus();
+    });
+
+    it('closes on the close button', () => {
+      render(<App />);
+      const card = openPress();
+
+      fireEvent.click(screen.getByRole('button', { name: 'Close' }));
+
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+      expect(card).toHaveFocus();
+    });
+
+    it('closes on a press outside it', () => {
+      render(<App />);
+      openPress();
+
+      fireEvent.mouseDown(screen.getByTestId('faceplate-scrim'));
+
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    });
+
+    it('leaves the fleet trend zone alone, whichever machine is opened', () => {
+      render(<App />);
+      const zone = screen.getByRole('region', { name: 'Fleet critical trends' });
+      const before = within(zone)
+        .getAllByRole('region', { name: /trend$/ })
+        .map((region) => region.getAttribute('aria-label'));
+
+      openPress();
+      fireEvent.keyDown(document, { key: 'Escape' });
+
+      const after = within(screen.getByRole('region', { name: 'Fleet critical trends' }))
+        .getAllByRole('region', { name: /trend$/ })
+        .map((region) => region.getAttribute('aria-label'));
+      expect(after).toEqual(before);
+    });
+
+    describe('alongside the inject button', () => {
+      beforeEach(() => {
+        vi.useFakeTimers();
+      });
+
+      afterEach(() => {
+        vi.useRealTimers();
+      });
+
+      it('does not open when a fault is injected, and the fault still lands', () => {
+        render(<App />);
+        const press = screen.getByRole('article', { name: /PRESS-01/ });
+
+        act(() => {
+          fireEvent.click(within(press).getByRole('button', { name: /inject fault/i }));
+        });
+        act(() => {
+          vi.advanceTimersByTime(TICK_MS);
+        });
+
+        expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+        const panel = screen.getByRole('region', { name: 'Alarms' });
+        expect(within(panel).getByText('1 open')).toBeInTheDocument();
+      });
+
+      /** The click stops at the button; the keystroke behind it must too. */
+      it('does not open when the inject button is used from the keyboard', () => {
+        render(<App />);
+        const press = screen.getByRole('article', { name: /PRESS-01/ });
+
+        act(() => {
+          fireEvent.keyDown(within(press).getByRole('button', { name: /inject fault/i }), {
+            key: 'Enter',
+          });
+        });
+
+        expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+      });
+
+      it('lists this machine alarms only, and the fleet panel keeps listing both', () => {
+        render(<App />);
+
+        act(() => {
+          fireEvent.click(
+            within(screen.getByRole('article', { name: /PRESS-01/ })).getByRole('button', {
+              name: /inject fault/i,
+            }),
+          );
+          fireEvent.click(
+            within(screen.getByRole('article', { name: /SPINDLE-02/ })).getByRole('button', {
+              name: /inject fault/i,
+            }),
+          );
+        });
+        act(() => {
+          vi.advanceTimersByTime(TICK_MS);
+        });
+
+        act(() => {
+          fireEvent.click(screen.getByRole('button', { name: /PRESS-01/ }));
+        });
+
+        const list = screen.getByRole('region', { name: 'PRESS-01 alarms' });
+        expect(within(list).getByText('1 open')).toBeInTheDocument();
+        expect(within(list).queryByText('SPINDLE-02')).not.toBeInTheDocument();
+        expect(within(screen.getByRole('region', { name: 'Alarms' })).getByText('2 open'))
+          .toBeInTheDocument();
+      });
+
+      it('follows the alarm lifecycle while it stays open', () => {
+        render(<App />);
+
+        act(() => {
+          fireEvent.click(screen.getByRole('button', { name: /PUMP-04/ }));
+        });
+        expect(screen.getByText('No active alarms for this asset.')).toBeInTheDocument();
+
+        act(() => {
+          fireEvent.click(
+            within(screen.getByRole('article', { name: /PUMP-04/ })).getByRole('button', {
+              name: /inject fault/i,
+            }),
+          );
+        });
+        act(() => {
+          vi.advanceTimersByTime(TICK_MS);
+        });
+
+        const list = screen.getByRole('region', { name: 'PUMP-04 alarms' });
+        expect(within(list).getByText('1 open')).toBeInTheDocument();
+        expect(screen.queryByText('No active alarms for this asset.')).not.toBeInTheDocument();
+      });
+    });
+  });
 });

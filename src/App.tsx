@@ -1,8 +1,9 @@
-import { useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { StatusBar } from './components/Dashboard/StatusBar';
 import { AssetTile } from './components/Dashboard/AssetTile';
 import { TrendChart } from './components/Dashboard/TrendChart';
 import { AlarmsPanel } from './components/Dashboard/AlarmsPanel';
+import { AssetFaceplate } from './components/Dashboard/AssetFaceplate';
 import { SourceBanner } from './components/Dashboard/SourceBanner';
 import { SourceSelector } from './components/Dashboard/SourceSelector';
 import { BootOverlay } from './components/Dashboard/BootOverlay';
@@ -11,14 +12,22 @@ import { useMcpData } from './hooks/useMcpData';
 import { useBootPhase } from './hooks/useBootPhase';
 import { useChartsPainted } from './hooks/useChartsPainted';
 import type { DataSourceId } from './types/mcp';
-import { assetLevel } from './lib/fleetStats';
-import { hasLimits } from './lib/thresholds';
+import {
+  CRITICAL_TREND_COUNT,
+  pickCriticalTrends,
+  type TrendCandidate,
+} from './lib/trendPriority';
 
 /**
  * Screen layout follows the usual supervision hierarchy: the header answers "is
  * the plant normal", the grid answers "which machine", and the trends answer "how
- * bad and for how long". Trends focus on whichever asset is currently worst, so
- * the detail pane follows the problem instead of needing to be steered.
+ * bad and for how long". All three are about the plant, so the trend pane shows
+ * the fleet's most critical metrics and is steered by nothing.
+ *
+ * One machine in depth is a different question and lives one layer up, in the
+ * faceplate a tile opens. That separation is the point: a pane sized for the
+ * overview cannot hold every metric of every asset, and the version that tried
+ * silently showed the first two and dropped the rest.
  *
  * Two data sources feed the same components. The simulator is the default and
  * needs nothing installed; the live source reads a real telemetry MCP server
@@ -40,14 +49,45 @@ function App() {
   const data = live ? mcp : simulated;
 
   const { assets, alarms, history, lastUpdate, acknowledge, injectFault } = data;
-  const [selectedId, setSelectedId] = useState<string | null>(null);
 
-  const focus = useMemo(() => {
-    const abnormal = assets.find((a) => assetLevel(a) !== 'normal');
-    return assets.find((a) => a.spec.id === selectedId) ?? abnormal ?? assets[0];
-  }, [assets, selectedId]);
+  const [faceplateId, setFaceplateId] = useState<string | null>(null);
+  const openerRef = useRef<HTMLElement | null>(null);
 
-  const trendMetrics = focus ? focus.spec.metrics.filter(hasLimits).slice(0, 2) : [];
+  /**
+   * Last render's picks, fed back in so the zone holds still between ticks. Read
+   * inside the memo and written from an effect, never during a render.
+   */
+  const previousPicks = useRef<TrendCandidate[]>([]);
+  const criticalTrends = useMemo(
+    () => pickCriticalTrends(assets, CRITICAL_TREND_COUNT, previousPicks.current),
+    [assets],
+  );
+  useEffect(() => {
+    previousPicks.current = criticalTrends;
+  }, [criticalTrends]);
+
+  const faceplateAsset = assets.find((a) => a.spec.id === faceplateId);
+
+  const closeFaceplate = useCallback(() => {
+    setFaceplateId(null);
+    openerRef.current?.focus();
+    openerRef.current = null;
+  }, []);
+
+  /**
+   * The tile that opened the dialog, captured from the event rather than read
+   * off the document later: a click does not focus a div in every browser, and
+   * focus has to land back where it started when the dialog closes.
+   */
+  const openFaceplate = (assetId: string, opener: HTMLElement) => {
+    openerRef.current = opener;
+    setFaceplateId(assetId);
+  };
+
+  /** A fleet can shrink under the dialog when the source changes. */
+  useEffect(() => {
+    if (faceplateId !== null && faceplateAsset === undefined) closeFaceplate();
+  }, [faceplateId, faceplateAsset, closeFaceplate]);
 
   /**
    * The fact the boot overlay waits on, per source.
@@ -63,9 +103,8 @@ function App() {
   const bootReady =
     source === 'mcp'
       ? mcp.connection.status !== 'connecting'
-      : focus !== undefined &&
-        trendMetrics.length > 0 &&
-        (history[`${focus.spec.id}:${trendMetrics[0].key}`]?.length ?? 0) > 0;
+      : criticalTrends.length > 0 &&
+        (history[`${criticalTrends[0].assetId}:${criticalTrends[0].spec.key}`]?.length ?? 0) > 0;
 
   const boot = useBootPhase(bootReady);
 
@@ -112,11 +151,17 @@ function App() {
                     key={asset.spec.id}
                     role="button"
                     tabIndex={0}
-                    onClick={() => setSelectedId(asset.spec.id)}
+                    aria-haspopup="dialog"
+                    onClick={(e) => openFaceplate(asset.spec.id, e.currentTarget)}
                     onKeyDown={(e) => {
+                      // A key pressed on the inject button belongs to the
+                      // button. Its click stops here, but the keystroke that
+                      // produced the click travels on its own and would open
+                      // the dialog behind it.
+                      if (e.target !== e.currentTarget) return;
                       if (e.key === 'Enter' || e.key === ' ') {
                         e.preventDefault();
-                        setSelectedId(asset.spec.id);
+                        openFaceplate(asset.spec.id, e.currentTarget);
                       }
                     }}
                     className="cursor-pointer focus:outline-none focus-visible:ring-1 focus-visible:ring-hmi-secondary"
@@ -127,18 +172,24 @@ function App() {
               </div>
             </section>
 
-            {focus ? (
-              <section aria-label="Trends" className="space-y-3" ref={trendsRef}>
-                <h2 className="text-xs font-semibold uppercase tracking-widest text-hmi-secondary">
-                  Trends
-                </h2>
+            {assets.length > 0 ? (
+              <section aria-label="Fleet critical trends" className="space-y-3" ref={trendsRef}>
+                <div>
+                  <h2 className="text-xs font-semibold uppercase tracking-widest text-hmi-secondary">
+                    Fleet critical trends
+                  </h2>
+                  <p className="mt-0.5 text-xs text-hmi-muted">
+                    The two metrics closest to their limits, across the whole fleet. Open a machine
+                    for all of its trends.
+                  </p>
+                </div>
                 <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
-                  {trendMetrics.map((spec) => (
+                  {criticalTrends.map(({ assetId, spec }) => (
                     <TrendChart
-                      key={spec.key}
-                      assetId={focus.spec.id}
+                      key={`${assetId}:${spec.key}`}
+                      assetId={assetId}
                       spec={spec}
-                      samples={history[`${focus.spec.id}:${spec.key}`] ?? []}
+                      samples={history[`${assetId}:${spec.key}`] ?? []}
                     />
                   ))}
                 </div>
@@ -149,6 +200,17 @@ function App() {
           <AlarmsPanel alarms={alarms} now={lastUpdate} onAcknowledge={acknowledge} />
         </div>
       </main>
+
+      {faceplateAsset ? (
+        <AssetFaceplate
+          asset={faceplateAsset}
+          history={history}
+          alarms={alarms}
+          now={lastUpdate}
+          onAcknowledge={acknowledge}
+          onClose={closeFaceplate}
+        />
+      ) : null}
 
       {boot.mounted ? (
         <BootOverlay
