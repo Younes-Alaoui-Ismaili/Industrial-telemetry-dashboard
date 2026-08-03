@@ -240,6 +240,51 @@ resolution it is laid out for, and `aria-modal` already removes the background f
 assistive technology. Longer history windows stay on the roadmap; this change is about
 which metrics are reachable, not how far back they go.
 
+## 3 August 2026 · A connect guide instead of a failure report on first selection
+
+On the published demo no local bridge can ever answer, by browser mixed content policy.
+Clicking MCP live therefore always ended on a banner written like an outage report, for a
+situation that is actually an optional install that has not been done. The demo was
+underselling its best feature at the exact moment a visitor showed interest in it.
+
+### Probe first, so there is nothing to roll back
+
+Selecting the live source now asks the bridge's health route for an answer before anything
+switches. A bridge that answers hands the switch to the live hook exactly as before. One
+that does not opens a short connect guide, three numbered steps and a single action, and
+the source never leaves the simulator. That ordering is the whole design: the selector, the
+header and the absence of a banner after closing the guide are not three restorations, they
+are one fact observed three ways. The health route was chosen over a snapshot because it
+costs the bridge one MCP tool call instead of four.
+
+The probe timeout is hand rolled with `AbortController` and `setTimeout` rather than
+`AbortSignal.timeout`, because jsdom schedules the latter's timer outside the fake timers
+the tests drive. A probe that comes back negative also drops any faceplate opened during
+its window: two document level key handlers and two focus traps fighting over one Escape is
+not a state the screen is allowed to reach.
+
+### A closed vocabulary list, checked on rendered text
+
+The guide's mandate carries a closed list of six words that must not appear anywhere in the
+flow: they are the vocabulary of a product defect, and a missing optional install is not
+one. The list is pinned by tests that sweep the rendered text of the whole screen, guide
+open, guide closed, and link lost, rather than by grepping the source: identifiers such as
+the `unavailable` status value are wire protocol, not prose, and stay.
+
+The same list is why the degradation banner no longer renders the connection's raw detail
+string. `Failed to fetch` is the browser's wording, not the dashboard's, and no sweep can
+guarantee a string another program composes. The detail stays in the connection state for
+anyone reading it from code; the banner states the substitution in its own words and says
+that polling continues.
+
+### The dialog shell is the faceplate's, not a second one
+
+The guide reuses the faceplate's dialog mechanics, extracted into a shell component rather
+than reimplemented. The extraction commit is the proof of its own safety: every faceplate
+and App dialog test passed without a single edit. The honest labelling contract survives
+untouched: a live session that loses its bridge still shows the banner and the
+`SIMULATED (FALLBACK)` header label, and simulated readings are never presented as live.
+
 ---
 
 ## A note on the numbers

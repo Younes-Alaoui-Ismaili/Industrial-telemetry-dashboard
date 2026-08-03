@@ -25,11 +25,11 @@ A selector in the header chooses where the readings come from.
 - **Simulated** (default). The built in simulator. Nothing to install, nothing to configure, and it is what the live demo above runs on.
 - **MCP live**. Real readings from a telemetry [MCP](https://modelcontextprotocol.io) server, reached through a small local bridge. The dashboard calls the server's own tools: `list_devices`, `get_telemetry`, `get_anomalies` and `simulate_fault`. Alarms in this mode are the ones the server detected, carrying the threshold the server itself crossed. Injecting a fault sends `simulate_fault` to the server and the readings move because the server moved them.
 
-> **MCP live works on your machine, not on the published demo.** The demo page is served over `https`, and a page served over `https` is not allowed to call `http://localhost`. That is browser mixed content policy and there is no way around it from a static site. Selecting **MCP live** on the published demo will always report the server as unavailable. To see it work, clone the repository and run it locally.
+> **MCP live works from a local build, as a condition of use.** The demo page is served over `https`, and a page served over `https` is not allowed to call `http://localhost`; that is browser mixed content policy. Selecting **MCP live** on the published demo therefore opens a short connect guide, describes the local setup in three steps, and leaves the simulator in charge. To see the live mode work, clone the repository and run it locally.
 
-### Honest degradation
+### Honest labelling
 
-If the server or the bridge is not running, the dashboard does not pretend. It shows a banner naming the failure, states in words that what is on screen is simulated, and marks the header source as `SIMULATED (FALLBACK)`. Simulated readings are never presented as live ones.
+Picking the live source probes the bridge first, and the source only switches when the bridge answers; until then the dashboard is labelled simulated because it is. A live session that later loses its bridge does not pretend either: a banner reads `MCP LINK LOST`, states in words that what is on screen is simulated, keeps polling for the bridge to come back, and the header source shows `SIMULATED (FALLBACK)`. Simulated readings are never presented as live ones.
 
 ### Running the live mode
 
