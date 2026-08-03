@@ -16,7 +16,12 @@ const OPTIONS: { id: DataSourceId; label: string; hint: string }[] = [
 
 interface SourceSelectorProps {
   value: DataSourceId;
-  onChange: (value: DataSourceId) => void;
+  /**
+   * The control that asked for the change travels with the choice, so the
+   * caller can hand focus back to it if the change opens a dialog instead of
+   * switching.
+   */
+  onChange: (value: DataSourceId, control: HTMLInputElement) => void;
 }
 
 export function SourceSelector({ value, onChange }: SourceSelectorProps) {
@@ -37,7 +42,7 @@ export function SourceSelector({ value, onChange }: SourceSelectorProps) {
                 name="data-source"
                 value={option.id}
                 checked={selected}
-                onChange={() => onChange(option.id)}
+                onChange={(event) => onChange(option.id, event.currentTarget)}
                 className="peer sr-only"
               />
               <span

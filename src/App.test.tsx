@@ -142,10 +142,11 @@ describe('App', () => {
   });
 
   /**
-   * The selector and the degradation path. These assert the promise the feature
-   * makes: the simulator is the default so the published demo needs nothing
-   * installed, and choosing the live source when no server is there says so in
-   * words instead of passing the simulator off as live.
+   * The selector and the switch. These assert the promise the feature makes:
+   * the simulator is the default so the published demo needs nothing
+   * installed, and the live source only carries the label when a bridge
+   * actually answered. The no-bridge path, which opens the connect guide
+   * instead of switching, lives in App.connect.test.tsx.
    */
   describe('data source', () => {
     afterEach(() => {
@@ -166,37 +167,6 @@ describe('App', () => {
     it('shows no degradation banner while the simulator is selected', () => {
       render(<App />);
       expect(screen.queryByTestId('source-banner')).not.toBeInTheDocument();
-    });
-
-    it('labels the fallback and names the reason when no server is reachable', async () => {
-      vi.stubGlobal(
-        'fetch',
-        vi.fn().mockRejectedValue(new TypeError('Failed to fetch')),
-      );
-      render(<App />);
-
-      fireEvent.click(screen.getByRole('radio', { name: /mcp live/i }));
-
-      const banner = await screen.findByTestId('source-banner');
-      expect(within(banner).getByText(/MCP server unavailable/i)).toBeInTheDocument();
-      expect(within(banner).getByText(/simulated/i)).toBeInTheDocument();
-      expect(within(banner).getByText('Failed to fetch')).toBeInTheDocument();
-      expect(screen.getByTestId('source-label')).toHaveTextContent('Simulated (fallback)');
-    });
-
-    it('keeps the fleet running on the simulator during the fallback', async () => {
-      vi.stubGlobal(
-        'fetch',
-        vi.fn().mockRejectedValue(new TypeError('Failed to fetch')),
-      );
-      render(<App />);
-
-      fireEvent.click(screen.getByRole('radio', { name: /mcp live/i }));
-      await screen.findByTestId('source-banner');
-
-      // The simulated fleet is still on screen, and it is labelled as simulated.
-      expect(screen.getAllByRole('article')).toHaveLength(8);
-      expect(screen.getByTestId('source-label')).not.toHaveTextContent('MCP live');
     });
 
     it('switches to the live fleet and labels it as live when the server answers', async () => {
@@ -240,18 +210,43 @@ describe('App', () => {
     });
 
     it('returns to the simulator when the operator switches back', async () => {
+      const now = Date.now();
       vi.stubGlobal(
         'fetch',
-        vi.fn().mockRejectedValue(new TypeError('Failed to fetch')),
+        vi.fn().mockResolvedValue({
+          ok: true,
+          status: 200,
+          json: async () => ({
+            status: 'live',
+            server: { name: 'telemetry', version: '0.1.0' },
+            fetchedAt: now,
+            window: { start: now - 900_000, end: now, step_ms: 30_000 },
+            devices: [
+              {
+                id: 'press-01',
+                name: 'Hydraulic Press',
+                state: 'running',
+                temperature_c: 62.4,
+                vibration_mm_s: 2.05,
+                timestamp: now,
+              },
+            ],
+            anomalies: [],
+            telemetry: { 'press-01': [] },
+          }),
+        }),
       );
       render(<App />);
 
       fireEvent.click(screen.getByRole('radio', { name: /mcp live/i }));
-      await screen.findByTestId('source-banner');
+      await waitFor(() =>
+        expect(screen.getByTestId('source-label')).toHaveTextContent('MCP live'),
+      );
 
       fireEvent.click(screen.getByRole('radio', { name: /simulated/i }));
 
       expect(screen.queryByTestId('source-banner')).not.toBeInTheDocument();
+      expect(screen.getByTestId('source-label')).toHaveTextContent('Simulated');
       expect(screen.getAllByRole('article')).toHaveLength(8);
     });
   });

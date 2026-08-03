@@ -1,12 +1,16 @@
 /**
  * The honest degradation notice.
  *
- * When the live source is selected but not reachable, the screen keeps working
- * on the simulator, and this banner is what makes that substitution impossible
- * to miss: it says the server is unavailable, it repeats the reason the bridge
- * or the browser actually gave, and it states in words that what is on screen is
+ * When a live session loses its bridge, the screen keeps working on the
+ * simulator, and this banner is what makes that substitution impossible to
+ * miss: it names the lost link and states in words that what is on screen is
  * simulated. Falling back quietly would turn a demo into a claim that is not
  * true, which is the one outcome this feature is built to prevent.
+ *
+ * The connection's raw detail string is deliberately not rendered: it comes
+ * from the browser or the bridge and is worded as a defect report, which a
+ * lost optional link is not. It stays in the connection state for anyone
+ * reading it from code.
  */
 
 import type { McpConnection } from '../../types/mcp';
@@ -36,20 +40,15 @@ export function SourceBanner({ connection }: SourceBannerProps) {
         />
         <p className="text-xs leading-relaxed text-hmi-primary">
           <span className="font-semibold uppercase tracking-wide">
-            {connecting ? 'Connecting to MCP server' : 'MCP server unavailable'}
+            {connecting ? 'Connecting to MCP server' : 'MCP link lost'}
           </span>
           {connecting ? (
             <> Waiting for the local bridge to answer.</>
           ) : (
             <>
               {' '}
-              Showing <strong>simulated</strong> data, not live readings.
-              {connection.detail ? (
-                <>
-                  {' '}
-                  Reason: <span className="font-mono text-hmi-secondary">{connection.detail}</span>
-                </>
-              ) : null}
+              Showing <strong>simulated</strong> data, not live readings. The dashboard keeps
+              polling and switches back when the bridge answers.
             </>
           )}
         </p>
