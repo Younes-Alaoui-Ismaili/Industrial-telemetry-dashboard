@@ -1,0 +1,7 @@
+# type: short imperative subject in lowercase (feat, fix, docs, chore, ci, perf, refactor, test)
+#
+# Body: explain why, not what. Wrap at 72 columns. Plain hyphens only,
+# no em or en dashes anywhere in the message.
+#
+# No attribution trailers of any kind (Co-Authored-By, Generated-with,
+# tool or assistant mentions). The commit speaks for the change alone.

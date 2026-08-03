@@ -164,6 +164,84 @@ tests.
 
 ---
 
+## 3 August 2026 · Asset faceplates, and a trend zone that belongs to the fleet
+
+The trend pane held two charts and was driven by whichever card had been clicked. A
+machine with more metrics than that lost the remainder silently: clicking `PRESS-01`, which
+carries temperature, vibration, pressure and a cycle count, drew two trends and gave no
+sign that two more existed.
+
+The cause was not a shortage of room. It was asset detail sitting inside an overview
+screen. Supervision practice separates the two: an overview states plant condition and
+deviation from it, and everything about one machine belongs a layer up, in a faceplate
+called from the overview. This change puts the two layers where they belong.
+
+### The faceplate
+
+Clicking anywhere on a card opens a dialog over the running screen. It draws **one full
+trend per metric the asset has**, in a two column grid whose row count comes from the
+metric list itself. Nothing counts slots. A machine with five metrics would draw five
+trends without a layout change, which is the property the previous version lacked.
+
+Under the trends sits that machine's alarm list, filtered to it and stating plainly when
+there are none. It is the same component as the fleet list, given three optional props,
+rather than a second alarm renderer: the row is where the lifecycle is stated, and forking
+it would be how the two copies start to disagree.
+
+Written against the DOM rather than taken from a package. Escape, a close button, a press
+outside, a focus trap and focus returned to the card that opened it are a few lines of
+event handling; a dependency for that would be larger than the feature.
+
+**Two details worth keeping.** The dialog reads the same state the cards read, so an alarm
+raised while it is open appears in it without a reopen. And it renders from the asset
+looked up by id, not from the id alone, so switching to the live source under an open
+dialog closes it instead of crashing on a machine that no longer exists.
+
+### The trend zone was repurposed, not removed
+
+It now shows the two metrics closest to their limits **across the whole fleet**, coupled to
+nothing. Removing it was considered and rejected: the boot sequence waits on a real fact
+about the trend pane, and deleting the pane would have meant rewriting that fact and its
+test to no benefit. Repurposing cost one line.
+
+Ranking lives in a pure module. Level first, then how far a reading has travelled from its
+nominal towards its limit as a fraction, which is what lets a temperature in C and a
+vibration in mm/s be compared at all. Counters cannot be candidates: a cycle count has no
+limit to approach.
+
+**The incumbent keeps a small bonus.** Without it the zone reshuffles on nearly every two
+second tick, because simulator noise moves normal candidates past each other by a few
+percent, and charts that swap that often carry no information. An escalation still
+preempts immediately, because level is compared before proximity.
+
+### A defect the stated fix would not have caught
+
+Stopping the inject button's click from reaching the card is the obvious half. The other
+half is that activating that button from the keyboard fires a `keydown` that travels to the
+card on its own, independently of the click it synthesises. The card would have opened a
+dialog behind the fault. The wrapper now ignores any key event that did not originate on
+it. Both halves are pinned by tests.
+
+### Verified, and by what
+
+The dialog was opened in a real browser, not only under the test DOM, because charts that
+render in an emulated layout can still measure to nothing in a real one. `PRESS-01` draws
+four trends, three of them carrying their warning and alarm lines with the values stated,
+and the cycle count carrying neither.
+
+Page height was measured on both branches at both resolutions rather than eyeballed. The
+overlay adds nothing to the document, and the trend zone heading was folded onto one line
+after the first version of it was measured 18 px taller than main.
+
+### Left out deliberately
+
+No body scroll lock, and no `inert` on the background: the page does not scroll at the
+resolution it is laid out for, and `aria-modal` already removes the background from
+assistive technology. Longer history windows stay on the roadmap; this change is about
+which metrics are reachable, not how far back they go.
+
+---
+
 ## A note on the numbers
 
 Test counts and coverage percentages have been deliberately omitted from these notes. The
