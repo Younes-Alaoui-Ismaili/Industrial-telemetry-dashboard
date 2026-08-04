@@ -67,7 +67,7 @@ describe('ConnectMcpModal', () => {
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 
-  it('closes exactly once on the croix', () => {
+  it('closes exactly once on the close control', () => {
     const { onClose } = renderModal();
     fireEvent.click(screen.getByRole('button', { name: 'Close' }));
 
@@ -98,12 +98,12 @@ describe('ConnectMcpModal', () => {
 
   it('keeps Tab inside the dialog, in both directions', () => {
     renderModal();
-    const croix = screen.getByRole('button', { name: 'Close' });
+    const closeControl = screen.getByRole('button', { name: 'Close' });
     const action = screen.getByRole('button', { name: 'Stay in simulated mode' });
 
     action.focus();
     fireEvent.keyDown(document, { key: 'Tab' });
-    expect(croix).toHaveFocus();
+    expect(closeControl).toHaveFocus();
 
     fireEvent.keyDown(document, { key: 'Tab', shiftKey: true });
     expect(action).toHaveFocus();

@@ -86,7 +86,7 @@ describe('connect guide', () => {
     expect(screen.getByRole('radio', { name: /mcp live/i })).toHaveFocus();
   });
 
-  it('closes on the croix and hands focus back to the selector', async () => {
+  it('closes on the close control and hands focus back to the selector', async () => {
     deadBridge();
     render(<App />);
 
