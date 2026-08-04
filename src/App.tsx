@@ -4,11 +4,13 @@ import { AssetTile } from './components/Dashboard/AssetTile';
 import { TrendChart } from './components/Dashboard/TrendChart';
 import { AlarmsPanel } from './components/Dashboard/AlarmsPanel';
 import { AssetFaceplate } from './components/Dashboard/AssetFaceplate';
+import { ConnectMcpModal } from './components/Dashboard/ConnectMcpModal';
 import { SourceBanner } from './components/Dashboard/SourceBanner';
 import { SourceSelector } from './components/Dashboard/SourceSelector';
 import { BootOverlay } from './components/Dashboard/BootOverlay';
 import { useSimulatedData } from './hooks/useSimulatedData';
 import { useMcpData } from './hooks/useMcpData';
+import { probeBridge } from './lib/bridgeProbe';
 import { useBootPhase } from './hooks/useBootPhase';
 import { useChartsPainted } from './hooks/useChartsPainted';
 import type { DataSourceId } from './types/mcp';
@@ -34,9 +36,13 @@ import {
  * through a local bridge. Both hooks always run, because hooks cannot be called
  * conditionally, but the live one does no work until it is selected.
  *
- * When the live source is selected and not reachable, the screen keeps running
- * on the simulator and says so twice, in the banner and in the header. It never
- * shows simulated readings under a live label.
+ * Picking the live source probes the bridge first. Only a bridge that answers
+ * switches the source; one that does not opens a short connect guide, and the
+ * source never leaves the simulator, so the header and the selector have
+ * nothing to roll back. A live session that later loses its bridge keeps the
+ * banner: the screen keeps running on the simulator and says so twice, in the
+ * banner and in the header. It never shows simulated readings under a live
+ * label.
  */
 function App() {
   const [source, setSource] = useState<DataSourceId>('simulated');
@@ -52,6 +58,47 @@ function App() {
 
   const [faceplateId, setFaceplateId] = useState<string | null>(null);
   const openerRef = useRef<HTMLElement | null>(null);
+
+  const [connectHelpOpen, setConnectHelpOpen] = useState(false);
+  const connectOpenerRef = useRef<HTMLElement | null>(null);
+  // A ref, not state: the pending window needs no render, only a latch that
+  // keeps a second press from racing a second probe.
+  const probePending = useRef(false);
+
+  /**
+   * Probe first. The live radio only carries the source when the bridge
+   * answers; a bridge that does not answer gets the connect guide instead, and
+   * the source stays on the simulator the whole time. That ordering is what
+   * makes closing the guide need no rollback: nothing switched.
+   */
+  const handleSourceChange = (next: DataSourceId, control: HTMLInputElement) => {
+    if (next !== 'mcp') {
+      setSource(next);
+      return;
+    }
+    if (source === 'mcp' || probePending.current) return;
+    probePending.current = true;
+    connectOpenerRef.current = control;
+    void probeBridge().then((reachable) => {
+      probePending.current = false;
+      if (reachable) {
+        setSource('mcp');
+        return;
+      }
+      // One dialog at a time: a faceplate opened during the probe window
+      // yields to the guide. Dropped without closeFaceplate, which would
+      // steal focus back to the tile.
+      setFaceplateId(null);
+      openerRef.current = null;
+      setConnectHelpOpen(true);
+    });
+  };
+
+  const closeConnectHelp = useCallback(() => {
+    setConnectHelpOpen(false);
+    connectOpenerRef.current?.focus();
+    connectOpenerRef.current = null;
+  }, []);
 
   /**
    * Last render's picks, fed back in so the zone holds still between ticks. Read
@@ -134,7 +181,7 @@ function App() {
         lastUpdate={lastUpdate}
         sourceLabel={live ? 'MCP live' : fallback ? 'Simulated (fallback)' : 'Simulated'}
         fallback={fallback}
-        selector={<SourceSelector value={source} onChange={setSource} />}
+        selector={<SourceSelector value={source} onChange={handleSourceChange} />}
       />
       {source === 'mcp' ? <SourceBanner connection={mcp.connection} /> : null}
 
@@ -211,6 +258,8 @@ function App() {
           onClose={closeFaceplate}
         />
       ) : null}
+
+      {connectHelpOpen ? <ConnectMcpModal onClose={closeConnectHelp} /> : null}
 
       {boot.mounted ? (
         <BootOverlay

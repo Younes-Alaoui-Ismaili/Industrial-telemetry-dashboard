@@ -118,17 +118,17 @@ describe('boot experience', () => {
     });
   });
 
-  describe('with the live source selected and no bridge', () => {
+  describe('with the live source picked after boot', () => {
     afterEach(() => {
       vi.unstubAllGlobals();
     });
 
     /**
-     * The honesty requirement, end to end. The overlay must not be what tells the
-     * visitor about the fallback, and it must not reappear and hide the banner
-     * that does.
+     * The honesty requirement, end to end. The overlay must not be what talks
+     * to the visitor about the live source, and it must not reappear and hide
+     * the guide or the banner that does.
      */
-    it('leaves the banner to state the fallback, and stays gone', async () => {
+    it('leaves the connect guide to explain, and stays gone', async () => {
       vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new TypeError('Failed to fetch')));
       render(<App />);
 
@@ -137,9 +137,34 @@ describe('boot experience', () => {
       });
 
       fireEvent.click(screen.getByRole('radio', { name: /mcp live/i }));
-      const banner = await screen.findByTestId('source-banner');
+      await screen.findByRole('dialog', { name: 'Connect a live MCP source' });
 
-      expect(within(banner).getByText(/MCP server unavailable/i)).toBeInTheDocument();
+      expect(screen.queryByTestId('source-banner')).not.toBeInTheDocument();
+      expect(screen.getByTestId('source-label')).toHaveTextContent('Simulated');
+      expect(screen.getByTestId('source-label')).not.toHaveTextContent('fallback');
+      expect(screen.queryByTestId('boot-overlay')).not.toBeInTheDocument();
+    });
+
+    it('leaves the banner to state a lost link, and stays gone', async () => {
+      // The probe finds a healthy bridge, then the live polling loses it.
+      vi.stubGlobal(
+        'fetch',
+        vi
+          .fn()
+          .mockResolvedValueOnce({ ok: true, status: 200, json: async () => ({ ok: true }) })
+          .mockRejectedValue(new TypeError('Failed to fetch')),
+      );
+      render(<App />);
+
+      await waitForElementToBeRemoved(() => screen.queryByTestId('boot-overlay'), {
+        timeout: 3000,
+      });
+
+      fireEvent.click(screen.getByRole('radio', { name: /mcp live/i }));
+      // The banner shows up in its connecting state first; wait for the loss.
+      const banner = await screen.findByTestId('source-banner');
+      await within(banner).findByText(/MCP link lost/i);
+
       expect(screen.getByTestId('source-label')).toHaveTextContent('Simulated (fallback)');
       expect(screen.queryByTestId('boot-overlay')).not.toBeInTheDocument();
     });
