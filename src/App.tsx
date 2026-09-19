@@ -10,6 +10,8 @@ import { SourceSelector } from './components/Dashboard/SourceSelector';
 import { BootOverlay } from './components/Dashboard/BootOverlay';
 import { useSimulatedData } from './hooks/useSimulatedData';
 import { useMcpData } from './hooks/useMcpData';
+import { useCloudData } from './hooks/useCloudData';
+import { CloudSourcePanel } from './components/Dashboard/CloudSourcePanel';
 import { probeBridge } from './lib/bridgeProbe';
 import { useBootPhase } from './hooks/useBootPhase';
 import { useChartsPainted } from './hooks/useChartsPainted';
@@ -45,14 +47,17 @@ import {
  * label.
  */
 function App() {
-  const [source, setSource] = useState<DataSourceId>('simulated');
+  const [source, setSource] = useState<DataSourceId>(() => new URLSearchParams(window.location.search).get('source') === 'cloud' ? 'cloud' : 'simulated');
 
+  const [cloudToken, setCloudToken] = useState('');
+  const cloud = useCloudData({ enabled: source === 'cloud', token: cloudToken });
+  const canAcknowledge = source !== 'cloud' || cloud.isOperator;
   const simulated = useSimulatedData();
   const mcp = useMcpData({ enabled: source === 'mcp' });
 
   const live = source === 'mcp' && mcp.connection.status === 'live';
   const fallback = source === 'mcp' && !live;
-  const data = live ? mcp : simulated;
+  const data = source === 'cloud' ? cloud : live ? mcp : simulated;
 
   const { assets, alarms, history, lastUpdate, acknowledge, injectFault } = data;
 
@@ -147,7 +152,7 @@ function App() {
    * behind states the fallback in words; holding the overlay up until something
    * succeeds would be waiting for an outcome that may never come.
    */
-  const bootReady =
+  const bootReady = source === 'cloud' ? cloud.connection.status !== 'connecting' :
     source === 'mcp'
       ? mcp.connection.status !== 'connecting'
       : criticalTrends.length > 0 &&
@@ -179,11 +184,13 @@ function App() {
         assets={assets}
         alarms={alarms}
         lastUpdate={lastUpdate}
-        sourceLabel={live ? 'MCP live' : fallback ? 'Simulated (fallback)' : 'Simulated'}
+        dataAvailable={source !== 'cloud' || (cloud.connection.status === 'live' && assets.length > 0)}
+        sourceLabel={source === 'cloud' ? (cloud.connection.status === 'live' ? 'Cloud API (' + cloud.deployment + ', simulated data)' : 'Cloud API unavailable') : live ? 'MCP live' : fallback ? 'Simulated (fallback)' : 'Simulated'}
         fallback={fallback}
         selector={<SourceSelector value={source} onChange={handleSourceChange} />}
       />
       {source === 'mcp' ? <SourceBanner connection={mcp.connection} /> : null}
+      {source === 'cloud' ? <CloudSourcePanel connection={cloud.connection} deployment={cloud.deployment} isOperator={cloud.isOperator} report={cloud.report} onToken={setCloudToken} /> : null}
 
       <main className="mx-auto max-w-[1600px] px-4 py-4">
         <div className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1fr)_360px]">
@@ -244,7 +251,7 @@ function App() {
             ) : null}
           </div>
 
-          <AlarmsPanel alarms={alarms} now={lastUpdate} onAcknowledge={acknowledge} />
+          <AlarmsPanel dataAvailable={source !== 'cloud' || cloud.connection.status === 'live'} alarms={alarms} now={lastUpdate} onAcknowledge={acknowledge} canAcknowledge={canAcknowledge} emptyText={source === 'cloud' && cloud.connection.status !== 'live' ? 'Alarm source unavailable.' : undefined} />
         </div>
       </main>
 
@@ -255,6 +262,7 @@ function App() {
           alarms={alarms}
           now={lastUpdate}
           onAcknowledge={acknowledge}
+          canAcknowledge={canAcknowledge}
           onClose={closeFaceplate}
         />
       ) : null}

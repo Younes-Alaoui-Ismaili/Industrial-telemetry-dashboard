@@ -1,0 +1,63 @@
+{
+  "at": "2026-09-10T12:27:11.6009337Z",
+  "subscription": {
+    "policies": {
+      "locationPlacementId": "Public_2014-09-01",
+      "quotaId": "FreeTrial_2014-09-01",
+      "spendingLimit": "On"
+    },
+    "state": "Enabled"
+  },
+  "plans": [
+    {
+      "location": "Central US",
+      "name": "telemetry-proof-yai-20260909-us-plan",
+      "sku": {
+        "capabilities": null,
+        "capacity": 1,
+        "family": "F",
+        "locations": null,
+        "name": "F1",
+        "size": "F1",
+        "skuCapacity": null,
+        "tier": "Free"
+      }
+    },
+    {
+      "location": "Canada East",
+      "name": "telemetry-proof-yai-20260909-plan",
+      "sku": {
+        "capabilities": null,
+        "capacity": 1,
+        "family": "F",
+        "locations": null,
+        "name": "F1",
+        "size": "F1",
+        "skuCapacity": null,
+        "tier": "Free"
+      }
+    }
+  ],
+  "databases": [
+    {
+      "freeLimitExhaustionBehavior": "AutoPause",
+      "location": "centralus",
+      "name": "telemetry",
+      "status": "Online",
+      "useFreeLimit": true
+    },
+    {
+      "freeLimitExhaustionBehavior": "AutoPause",
+      "location": "centralus",
+      "name": "telemetry-recovery-20260910",
+      "status": "Paused",
+      "useFreeLimit": true
+    }
+  ],
+  "firewall": {
+    "end": "0.0.0.0",
+    "name": "AllowAzureServices",
+    "start": "0.0.0.0"
+  },
+  "protectionsPassed": true
+}

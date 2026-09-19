@@ -1,0 +1,19 @@
+TAP version 13
+# (node:20600) [DEP0123] DeprecationWarning: Setting the TLS ServerName to an IP address is not permitted by RFC 6066. This will be ignored in a future version.
+# (Use `node --trace-deprecation ...` to show where the warning was created)
+# {"sha256":"da3d3b2d7d6233d21637f422c6ca9fee9d6c690bfe35703d4d965d426cf0fa1b","rows":{"devices":4,"events":160,"alarms":4,"audit":14}}
+# Subtest: export/import into an empty SQL database preserves the data digest and refuses overwrite
+ok 1 - export/import into an empty SQL database preserves the data digest and refuses overwrite
+  ---
+  duration_ms: 2282.7448
+  type: 'test'
+  ...
+1..1
+# tests 1
+# suites 0
+# pass 1
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 6506.1347

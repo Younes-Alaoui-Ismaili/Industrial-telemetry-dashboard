@@ -1,0 +1,35 @@
+{
+  "at": "2026-09-10T12:31:39.493837Z",
+  "status": 200,
+  "scope": "Subscription month to date",
+  "isInvoice": false,
+  "properties": {
+    "nextLink": null,
+    "columns": [
+      {
+        "name": "PreTaxCost",
+        "type": "Number"
+      },
+      {
+        "name": "UsageDate",
+        "type": "Number"
+      },
+      {
+        "name": "Currency",
+        "type": "String"
+      }
+    ],
+    "rows": [
+      [
+        0.0,
+        20260909,
+        "CAD"
+      ],
+      [
+        0.0,
+        20260910,
+        "CAD"
+      ]
+    ]
+  }
+}

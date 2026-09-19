@@ -1,0 +1,23 @@
+{
+  "expected_asset": "/assets/index-Cdidt9JL.js",
+  "scope": "Application release, Azure SQL connectivity and unchanged persisted alarm read in a separate Reader session",
+  "phase": "rollback",
+  "pass": true,
+  "attempts": [
+    {
+      "asset": "/assets/index-Cdidt9JL.js",
+      "pass": true,
+      "at": "2026-09-10T11:59:52.3608628Z",
+      "actor_unchanged": true,
+      "health": {
+        "status": "ready",
+        "deployment": "azure",
+        "provenance": "simulated",
+        "role": "Reader"
+      },
+      "alarm_id": "c2026d0a-3b3a-4810-8710-cdf4a1a6856b",
+      "acknowledged_at": 1789041281129,
+      "attempt": 1
+    }
+  ]
+}

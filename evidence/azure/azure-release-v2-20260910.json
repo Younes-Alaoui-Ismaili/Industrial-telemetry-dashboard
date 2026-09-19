@@ -1,0 +1,20 @@
+{
+  "pass": true,
+  "phase": "v2",
+  "attempts": [
+    {
+      "pass": true,
+      "asset": "/assets/index-D7N1ilKn.js",
+      "attempt": 1,
+      "health": {
+        "status": "ready",
+        "deployment": "azure",
+        "provenance": "simulated",
+        "role": "Reader"
+      },
+      "at": "2026-09-10T11:47:00.3253623Z"
+    }
+  ],
+  "limitation": "Application release and SQL connectivity only; synthetic alarm lifecycle pending Operator approval",
+  "expected_asset": "/assets/index-D7N1ilKn.js"
+}

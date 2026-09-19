@@ -1,0 +1,9 @@
+{
+  "initialStatus": 200,
+  "outageStatus": 503,
+  "recoveredStatus": 200,
+  "uiUnavailable": true,
+  "uiRecovered": true,
+  "database": "owned local SQL Server container",
+  "date": "2026-09-09T15:37:32.665Z"
+}

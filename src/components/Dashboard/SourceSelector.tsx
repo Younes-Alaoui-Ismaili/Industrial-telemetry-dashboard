@@ -12,6 +12,7 @@ import type { DataSourceId } from '../../types/mcp';
 const OPTIONS: { id: DataSourceId; label: string; hint: string }[] = [
   { id: 'simulated', label: 'Simulated', hint: 'Built in simulator, no setup required' },
   { id: 'mcp', label: 'MCP live', hint: 'Live readings from a telemetry MCP server' },
+  { id: 'cloud', label: 'Cloud', hint: 'Persisted measurements through the authenticated API' },
 ];
 
 interface SourceSelectorProps {

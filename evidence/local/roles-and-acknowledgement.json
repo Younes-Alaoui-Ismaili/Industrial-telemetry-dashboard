@@ -1,0 +1,9 @@
+{
+  "operator": true,
+  "readerHasNoAck": true,
+  "acknowledgementSurvivesReloadAndSecondSession": true,
+  "alarmId": "7d5e75fd-00d7-4038-ab8d-6b7435a2c98b",
+  "browserErrors": [],
+  "provenance": "real browser and API, simulated measurements",
+  "date": "2026-09-09T15:16:05.261Z"
+}

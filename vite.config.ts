@@ -8,6 +8,7 @@ export default defineConfig({
   // relative asset resolution is safe here.
   base: './',
   plugins: [react()],
+  server: { proxy: { '/api': { target: 'http://127.0.0.1:4100', changeOrigin: false } } },
   test: {
     globals: true,
     // Two projects, because the two halves of this repository run in different

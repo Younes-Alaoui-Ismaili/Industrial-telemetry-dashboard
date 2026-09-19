@@ -1,0 +1,30 @@
+{
+  "duplicate": {
+    "accepted": 0,
+    "duplicates": 1
+  },
+  "report": {
+    "window": {
+      "start": 1789041007260,
+      "end": 1789041136863
+    },
+    "alarm_count": 2,
+    "acknowledged_count": 1,
+    "cleared_count": 2,
+    "average_acknowledgement_ms": 213869,
+    "average_cleared_duration_ms": 9603,
+    "units": "milliseconds",
+    "basis": "alarms raised in the selected window; unacknowledged and open durations excluded from averages",
+    "provenance": "simulated"
+  },
+  "ack_retry_same_timestamp": true,
+  "ack_retry_status": 200,
+  "browser_action": "Ack vibration alarm, then separate Reader HTTP GET",
+  "alarm_id": "c2026d0a-3b3a-4810-8710-cdf4a1a6856b",
+  "operator_matches": true,
+  "acknowledged_at": 1789041281129,
+  "reader_observes_ack": true,
+  "at": "2026-09-10T11:55:45.6056037Z",
+  "readings_for_press": 20,
+  "invalid_status": 400
+}

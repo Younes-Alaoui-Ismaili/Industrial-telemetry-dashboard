@@ -1,0 +1,8 @@
+{
+  "at": "2026-09-10T12:27:24.1362284Z",
+  "scope": "Subscription month to date",
+  "isInvoice": false,
+  "status": "unavailable",
+  "error": "Response status code does not indicate success: 429 (Too Many Requests).",
+  "details": "\r\n{\r\n  \"error\": {\r\n    \"code\": \"429\",\r\n    \"message\": \"Too many requests. Please retry.\"\r\n  }\r\n}"
+}

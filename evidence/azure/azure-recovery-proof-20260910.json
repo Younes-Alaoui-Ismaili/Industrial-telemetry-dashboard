@@ -1,0 +1,25 @@
+{
+  "at": "2026-09-10T12:09:11.207Z",
+  "method": "export and import to a distinct empty Azure SQL free database",
+  "source": "telemetry",
+  "destination": "telemetry-recovery-20260910",
+  "sha256": "0219decc9cbe469d995d624ba561f07bb4e98bd8f8f05a7d9dd8290b8719c692",
+  "recoveredSha256": "0219decc9cbe469d995d624ba561f07bb4e98bd8f8f05a7d9dd8290b8719c692",
+  "rows": {
+    "devices": 4,
+    "events": 80,
+    "alarms": 2,
+    "audit": 9
+  },
+  "acknowledgementAuditCount": 1,
+  "duplicateImportRefused": true,
+  "imported": {
+    "imported": {
+      "devices": 4,
+      "events": 80,
+      "alarms": 2,
+      "audit": 9
+    }
+  },
+  "passed": true
+}

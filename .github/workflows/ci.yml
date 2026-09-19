@@ -16,7 +16,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
 
       - name: Install dependencies
@@ -39,3 +39,11 @@ jobs:
 
       - name: Build
         run: npm run build
+
+      - name: Install API dependencies
+        run: npm ci
+        working-directory: api
+
+      - name: API contracts and build
+        run: npm test && npm run build
+        working-directory: api

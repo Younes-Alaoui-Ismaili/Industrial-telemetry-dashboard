@@ -2,6 +2,10 @@
 
 # Industrial Telemetry Dashboard
 
+[Watch the recorded Azure walkthrough](evidence/azure/cloud-browser-20260919.webm): authenticated cloud data, alarm acknowledgement and reload. Synthetic measurements, personal demonstration; [verification and limitations](evidence/azure/README.md).
+
+**Persistent API extension:** SQL history, server-owned alarms, Reader/Operator access and a third Cloud source are documented in [the local setup](docs/persistent-telemetry.md). [Actual Azure acceptance evidence](evidence/azure/README.md) covers authenticated SQL access, persistent acknowledgement, restart, rollback, a temporary SQL access incident and export/import recovery. [Azure operations](docs/azure-operations.md) provides reproduction procedures. The public demo below uses the simulator; the Azure proof is a separate, access-controlled personal demonstration. [Local recordings](evidence/README.md) remain available and are labelled as local.
+
 > A supervision screen for a fleet of industrial machines: live readings against operating limits, threshold driven alarms with a real lifecycle, and a self contained data simulator so it runs with one command.
 
 [![CI](https://github.com/Younes-Alaoui-Ismaili/Industrial-telemetry-dashboard/actions/workflows/ci.yml/badge.svg)](https://github.com/Younes-Alaoui-Ismaili/Industrial-telemetry-dashboard/actions/workflows/ci.yml)
@@ -22,6 +26,7 @@ Eight machines report temperature, vibration, pressure, speed and cycle counts. 
 
 A selector in the header chooses where the readings come from.
 
+- **Cloud**. Authenticated application API with SQL persistence. The screen distinguishes a local API from Azure and shows unavailable on source failure. [Setup and limits](docs/persistent-telemetry.md).
 - **Simulated** (default). The built in simulator. Nothing to install, nothing to configure, and it is what the live demo above runs on.
 - **MCP live**. Real readings from a telemetry [MCP](https://modelcontextprotocol.io) server, reached through a small local bridge. The dashboard calls the server's own tools: `list_devices`, `get_telemetry`, `get_anomalies` and `simulate_fault`. Alarms in this mode are the ones the server detected, carrying the threshold the server itself crossed. Injecting a fault sends `simulate_fault` to the server and the readings move because the server moved them.
 
@@ -88,7 +93,7 @@ Full page captures of the production build, taken by the same pipeline as the an
 
 ## Architecture
 
-The dashboard is client side. Two hooks expose the same return shape, so the components never learn which source they are rendering; all decision logic lives in pure modules that are unit tested without rendering. Only the live mode reaches outside the browser, and it does so through a Node process that keeps the MCP client out of the bundle entirely.
+Three source hooks feed the React dashboard. Simulated and local MCP modes preserve their existing behavior. Cloud mode reads the Fastify API and uses server-owned alarm identities and acknowledgements. The MCP SDK remains outside the browser bundle. The diagram below describes the original local paths; the persistent API path is documented separately.
 
 ```mermaid
 flowchart LR
@@ -127,7 +132,7 @@ Nothing is added to the browser bundle for the live mode: the MCP SDK is a depen
 
 ## Getting started
 
-Requirements: Node.js 18+ and npm.
+Requirements for the complete local demonstration: Node.js 22 and npm, with SQL Server for the persistent API. The standalone simulator does not require SQL.
 
 ```bash
 # install exact dependencies
@@ -169,7 +174,7 @@ npm run capture                            # both the GIF and the screenshots
 
 ## Roadmap
 
-- Persist fleet configuration and limits instead of defining them in code.
+- Add an operator form to edit fleet configuration; the API already persists registered equipment and limits in SQL.
 - Extend the asset faceplate with longer history windows.
 - Reconcile the two fleets: the live source reports the four machines the telemetry server exposes, the simulator carries eight.
 

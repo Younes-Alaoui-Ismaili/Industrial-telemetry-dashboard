@@ -46,11 +46,13 @@ interface BootOverlayProps {
 const SOURCE_LABEL: Record<DataSourceId, string> = {
   simulated: 'Simulated',
   mcp: 'MCP live',
+  cloud: 'Cloud API',
 };
 
 const MESSAGE: Record<DataSourceId, string> = {
   simulated: 'Starting the fleet simulator. This is normal; readings appear as soon as it completes.',
   mcp: 'Contacting the telemetry bridge. This is normal; the result is reported either way.',
+  cloud: 'Contacting the API. Its availability and data origin will be shown.',
 };
 
 /** How often the elapsed counter refreshes. */

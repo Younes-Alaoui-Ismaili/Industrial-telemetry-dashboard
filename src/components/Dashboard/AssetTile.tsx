@@ -21,7 +21,7 @@ import { StatusIndicator } from './StatusIndicator';
 interface AssetTileProps {
   asset: Asset;
   history: History;
-  onInjectFault: (assetId: string) => void;
+  onInjectFault?: (assetId: string) => void;
 }
 
 const edge: Record<MetricLevel, string> = {
@@ -79,7 +79,7 @@ export function AssetTile({ asset, history, onInjectFault }: AssetTileProps) {
         })}
       </dl>
 
-      <button
+      {onInjectFault ? <button
         type="button"
         onClick={(e) => {
           e.stopPropagation();
@@ -88,7 +88,7 @@ export function AssetTile({ asset, history, onInjectFault }: AssetTileProps) {
         className="mt-3 w-full border border-hmi-axis px-2 py-1 text-xs uppercase tracking-wider text-hmi-secondary transition-colors hover:bg-hmi-raised focus:outline-none focus-visible:ring-1 focus-visible:ring-hmi-secondary"
       >
         Inject fault
-      </button>
+      </button> : null}
     </article>
   );
 }

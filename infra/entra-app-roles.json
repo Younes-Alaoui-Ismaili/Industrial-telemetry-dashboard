@@ -1,0 +1,24 @@
+[
+  {
+    "allowedMemberTypes": [
+      "User",
+      "Application"
+    ],
+    "description": "Read telemetry and reports",
+    "displayName": "Reader",
+    "id": "7f02c42a-f80f-4d92-945f-4c1e960d7d51",
+    "isEnabled": true,
+    "value": "Reader"
+  },
+  {
+    "allowedMemberTypes": [
+      "User",
+      "Application"
+    ],
+    "description": "Ingest telemetry and acknowledge alarms",
+    "displayName": "Operator",
+    "id": "cde0bd7d-7b47-4f36-b20b-baf1ab9712df",
+    "isEnabled": true,
+    "value": "Operator"
+  }
+]

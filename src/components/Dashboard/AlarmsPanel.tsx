@@ -20,6 +20,8 @@ interface AlarmsPanelProps {
   alarms: readonly Alarm[];
   now: number;
   onAcknowledge: (alarmId: string) => void;
+  canAcknowledge?: boolean;
+  dataAvailable?: boolean;
   /** Restrict the list to one asset. Omitted, the whole fleet is listed. */
   assetId?: string;
   /** Accessible name. Must differ from the fleet list when both are on screen. */
@@ -42,6 +44,8 @@ export function AlarmsPanel({
   alarms,
   now,
   onAcknowledge,
+  canAcknowledge = true,
+  dataAvailable = true,
   assetId,
   ariaLabel = 'Alarms',
   emptyText = 'No active alarms. Fleet within limits.',
@@ -58,7 +62,7 @@ export function AlarmsPanel({
         <h2 className="text-xs font-semibold uppercase tracking-widest text-hmi-secondary">
           Alarms
         </h2>
-        <span className="font-mono text-xs tabular-nums text-hmi-muted">{open.length} open</span>
+        <span className="font-mono text-xs tabular-nums text-hmi-muted">{dataAvailable ? `${open.length} open` : 'Unknown'}</span>
       </header>
 
       {open.length === 0 ? (
@@ -97,7 +101,7 @@ export function AlarmsPanel({
                     </p>
                   </div>
 
-                  {!acked ? (
+                  {!acked && canAcknowledge ? (
                     <button
                       type="button"
                       onClick={() => onAcknowledge(alarm.id)}

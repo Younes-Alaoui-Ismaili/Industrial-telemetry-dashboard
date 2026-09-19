@@ -29,6 +29,7 @@ interface AssetFaceplateProps {
   alarms: readonly Alarm[];
   now: number;
   onAcknowledge: (alarmId: string) => void;
+  canAcknowledge?: boolean;
   onClose: () => void;
 }
 
@@ -38,6 +39,7 @@ export function AssetFaceplate({
   alarms,
   now,
   onAcknowledge,
+  canAcknowledge = true,
   onClose,
 }: AssetFaceplateProps) {
   const closeRef = useRef<HTMLButtonElement | null>(null);
@@ -90,6 +92,7 @@ export function AssetFaceplate({
             alarms={alarms}
             now={now}
             onAcknowledge={onAcknowledge}
+            canAcknowledge={canAcknowledge}
             assetId={asset.spec.id}
             ariaLabel={`${asset.spec.id} alarms`}
             emptyText="No active alarms for this asset."

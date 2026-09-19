@@ -1,0 +1,14 @@
+{
+  "checkedAt": "2026-09-10T12:40:01.5514853Z",
+  "method": "Independent authenticated GET after user reported Ack and reload",
+  "alarmId": "47cbb022-1424-4093-9724-c7eefe1df799",
+  "deviceId": "press-01",
+  "metric": "temperature",
+  "acknowledgedAt": 1789043895206,
+  "clearedAt": 1789041076863,
+  "actorMatchesAuthorizedOperator": true,
+  "passed": true,
+  "httpWritesPerformed": 0,
+  "reloadReportedByUser": true,
+  "reloadObservedByAutomation": false
+}

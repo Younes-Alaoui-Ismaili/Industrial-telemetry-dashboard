@@ -1,0 +1,23 @@
+[
+  {
+    "case": "anonymous",
+    "status": 401,
+    "expected": 401,
+    "pass": true,
+    "body": "non-JSON response"
+  },
+  {
+    "case": "reader_health",
+    "status": 200,
+    "expected": 200,
+    "pass": true,
+    "body": "{\"status\":\"ready\",\"deployment\":\"azure\",\"provenance\":\"simulated\",\"role\":\"Reader\"}"
+  },
+  {
+    "case": "reader_write_denied",
+    "status": 403,
+    "expected": 403,
+    "pass": true,
+    "body": "{\"error\":\"forbidden\"}"
+  }
+]

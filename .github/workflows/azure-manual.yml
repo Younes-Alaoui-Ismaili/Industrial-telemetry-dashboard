@@ -1,0 +1,82 @@
+name: Azure manual deployment
+on:
+  workflow_dispatch:
+    inputs:
+      revision:
+        description: Existing commit or tag to package, including a previous release for rollback
+        required: true
+        type: string
+      deploy:
+        description: Deploy only after free eligibility, Entra roles and SQL bootstrap are verified
+        required: true
+        type: boolean
+        default: false
+permissions:
+  contents: read
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.revision }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm ci
+      - run: npm ci
+        working-directory: bridge
+      - name: Record packaged revision
+        run: echo "SOURCE_REVISION=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
+      - run: npm test
+      - run: npm run build
+      - run: npm ci
+        working-directory: api
+      - run: npm test && npm run build
+        working-directory: api
+      - run: npm run package:azure
+      - uses: actions/upload-artifact@v4
+        with:
+          name: azure-package
+          path: .azure-package
+          include-hidden-files: true
+          retention-days: 7
+  deploy:
+    if: inputs.deploy
+    needs: package
+    runs-on: ubuntu-latest
+    environment: azure-demo
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: azure-package
+          path: package
+      - uses: azure/login@v2
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+      - name: Verify existing free resource configuration
+        env:
+          SUBSCRIPTION: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+          GROUP: ${{ vars.AZURE_RESOURCE_GROUP }}
+          APP: ${{ vars.AZURE_APP_NAME }}
+          SQL_SERVER: ${{ vars.AZURE_SQL_SERVER }}
+          SQL_DATABASE: ${{ vars.AZURE_SQL_DATABASE }}
+        run: |
+          set -euo pipefail
+          subscription_url="https://management.azure.com/subscriptions/$SUBSCRIPTION?api-version=2022-12-01"
+          test "$(az rest --method get --url "$subscription_url" --query subscriptionPolicies.spendingLimit -o tsv)" = On
+          quota=$(az rest --method get --url "$subscription_url" --query subscriptionPolicies.quotaId -o tsv)
+          case "$quota" in FreeTrial*) ;; *) echo 'An active protected free trial is required'; exit 1 ;; esac
+          plan=$(az webapp show -g "$GROUP" -n "$APP" --query serverFarmId -o tsv)
+          test "$(az appservice plan show --ids "$plan" --query sku.name -o tsv)" = F1
+          test "$(az sql db show -g "$GROUP" -s "$SQL_SERVER" -n "$SQL_DATABASE" --query useFreeLimit -o tsv)" = true
+          test "$(az sql db show -g "$GROUP" -s "$SQL_SERVER" -n "$SQL_DATABASE" --query freeLimitExhaustionBehavior -o tsv)" = AutoPause
+      - uses: azure/webapps-deploy@v3
+        with:
+          app-name: ${{ vars.AZURE_APP_NAME }}
+          package: package

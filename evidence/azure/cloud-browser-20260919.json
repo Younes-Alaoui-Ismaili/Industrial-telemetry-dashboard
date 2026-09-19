@@ -1,0 +1,38 @@
+{
+  "checkedAt": "2026-09-19T17:42:11.8698314Z",
+  "method": "Independent authenticated API read after browser Ack and reload",
+  "browserRole": "Operator",
+  "scenario": "ecb055f2-698b-4ee1-9567-3cc00fc45a80",
+  "provenance": "simulated measurements persisted in Azure SQL",
+  "alarms": [
+    {
+      "id": "be0a90b5-b229-439e-acb6-374e106b233d",
+      "device_id": "press-01",
+      "metric": "temperature",
+      "raised_at": 1789839463795,
+      "acknowledged_at": null,
+      "cleared_at": 1789839473089
+    },
+    {
+      "id": "ceca0090-07be-4ceb-b0bf-f155d5da2cc5",
+      "device_id": "press-01",
+      "metric": "vibration",
+      "raised_at": 1789839463795,
+      "acknowledged_at": 1789839483706,
+      "cleared_at": 1789839473089
+    }
+  ],
+  "passed": true,
+  "httpWritesInVerification": 0,
+  "video": "cloud-browser-20260919.webm",
+  "videoValidation": {
+    "browserPlaybackCompleted": true,
+    "width": 1440,
+    "capture": "CDP screencast, original timing, idle lead-in trimmed, silent",
+    "height": 810,
+    "visualReview": "Opening and final states inspected; two open alarms before, one after acknowledgement and reload",
+    "sha256": "6c7d044ea980dea298a87f1569dadec1617fb35a40fce741c0b8842f1f572370",
+    "durationSeconds": 37.64,
+    "browserMediaError": null
+  }
+}

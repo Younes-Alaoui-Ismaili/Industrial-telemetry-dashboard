@@ -1,0 +1,23 @@
+{
+  "pass": true,
+  "expected_asset": "/assets/index-D7N1ilKn.js",
+  "phase": "post-outage",
+  "attempts": [
+    {
+      "attempt": 1,
+      "at": "2026-09-10T12:27:21.5117448Z",
+      "asset": "/assets/index-D7N1ilKn.js",
+      "acknowledged_at": 1789041281129,
+      "alarm_id": "c2026d0a-3b3a-4810-8710-cdf4a1a6856b",
+      "health": {
+        "status": "ready",
+        "deployment": "azure",
+        "provenance": "simulated",
+        "role": "Reader"
+      },
+      "actor_unchanged": true,
+      "pass": true
+    }
+  ],
+  "scope": "Application release, Azure SQL connectivity and unchanged persisted alarm read in a separate Reader session"
+}

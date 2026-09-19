@@ -1,0 +1,15 @@
+{
+  "checkedAt": "2026-09-19T17:35:40.1134054Z",
+  "health": {
+    "status": "ready",
+    "deployment": "azure",
+    "provenance": "simulated",
+    "role": "Operator"
+  },
+  "historicalAlarmPresent": true,
+  "acknowledgementUnchanged": true,
+  "alarmCount": 2,
+  "unacknowledgedCount": 0,
+  "httpWrites": 0,
+  "initialAttempt": "HTTP 503; Azure container exited during first startup, then restarted successfully"
+}

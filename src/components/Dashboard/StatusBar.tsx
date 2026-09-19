@@ -21,6 +21,8 @@ interface StatusBarProps {
   sourceLabel: string;
   /** True when the live source was asked for and the simulator is standing in. */
   fallback?: boolean;
+  /** False when source failure prevents any fleet measurement. */
+  dataAvailable?: boolean;
   /** The source selector, rendered at the end of the bar. */
   selector?: ReactNode;
 }
@@ -70,6 +72,7 @@ export function StatusBar({
   lastUpdate,
   sourceLabel,
   fallback = false,
+  dataAvailable = true,
   selector,
 }: StatusBarProps) {
   const counts = countBySeverity(alarms);
@@ -85,19 +88,19 @@ export function StatusBar({
           <p className="text-xs text-hmi-muted">Fleet supervision</p>
         </div>
 
-        <Stat label="Assets online" value={`${online}/${assets.length}`} />
+        <Stat label="Assets online" value={dataAvailable ? `${online}/${assets.length}` : 'Unknown'} />
         <Stat
           label="Alarm"
-          value={String(counts.alarm)}
+          value={dataAvailable ? String(counts.alarm) : 'Unknown'}
           tone={counts.alarm > 0 ? 'text-hmi-alarm' : 'text-hmi-muted'}
         />
         <Stat
           label="Warning"
-          value={String(counts.warning)}
+          value={dataAvailable ? String(counts.warning) : 'Unknown'}
           tone={counts.warning > 0 ? 'text-hmi-warning' : 'text-hmi-muted'}
         />
-        <Stat label="Availability" value={`${availability(assets).toFixed(1)}%`} />
-        <Stat label="Updated" value={formatClock(lastUpdate)} tone="text-hmi-secondary" />
+        <Stat label="Availability" value={dataAvailable ? `${availability(assets).toFixed(1)}%` : 'Unknown'} />
+        <Stat label="Updated" value={dataAvailable ? formatClock(lastUpdate) : 'No data'} tone="text-hmi-secondary" />
         <SourceStat label={sourceLabel} fallback={fallback} />
 
         {selector ? <div className="ml-auto">{selector}</div> : null}

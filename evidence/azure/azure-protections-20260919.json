@@ -1,0 +1,35 @@
+{
+  "checkedAt": "2026-09-19T17:46:17.9569645Z",
+  "subscription": {
+    "policies": {
+      "locationPlacementId": "Public_2014-09-01",
+      "quotaId": "FreeTrial_2014-09-01",
+      "spendingLimit": "On"
+    },
+    "state": "Enabled"
+  },
+  "plans": [
+    {
+      "name": "telemetry-proof-yai-20260909-us-plan",
+      "sku": "F1"
+    },
+    {
+      "name": "telemetry-proof-yai-20260909-plan",
+      "sku": "F1"
+    }
+  ],
+  "databases": [
+    {
+      "freeLimitExhaustionBehavior": "AutoPause",
+      "name": "telemetry",
+      "status": "Online",
+      "useFreeLimit": true
+    },
+    {
+      "freeLimitExhaustionBehavior": "AutoPause",
+      "name": "telemetry-recovery-20260910",
+      "status": "Paused",
+      "useFreeLimit": true
+    }
+  ]
+}

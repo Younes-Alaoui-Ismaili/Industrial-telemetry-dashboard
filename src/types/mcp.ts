@@ -55,7 +55,7 @@ export interface WireSnapshot {
 }
 
 /** Which data source the operator selected. */
-export type DataSourceId = 'simulated' | 'mcp';
+export type DataSourceId = 'simulated' | 'mcp' | 'cloud';
 
 /**
  * State of the live source.

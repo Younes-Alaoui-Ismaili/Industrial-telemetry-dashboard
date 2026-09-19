@@ -1,0 +1,78 @@
+{
+  "checkedAt": "2026-09-19T17:45:18.8120033Z",
+  "isInvoice": false,
+  "scope": "Subscription month to date",
+  "initialAttempt": "HTTP 429",
+  "status": 200,
+  "columns": [
+    {
+      "name": "PreTaxCost",
+      "type": "Number"
+    },
+    {
+      "name": "UsageDate",
+      "type": "Number"
+    },
+    {
+      "name": "Currency",
+      "type": "String"
+    }
+  ],
+  "rows": [
+    [
+      0.0,
+      20260909,
+      "CAD"
+    ],
+    [
+      0.0,
+      20260910,
+      "CAD"
+    ],
+    [
+      0.0,
+      20260911,
+      "CAD"
+    ],
+    [
+      0.0,
+      20260912,
+      "CAD"
+    ],
+    [
+      0.0,
+      20260913,
+      "CAD"
+    ],
+    [
+      0.0,
+      20260914,
+      "CAD"
+    ],
+    [
+      0.0,
+      20260915,
+      "CAD"
+    ],
+    [
+      0.0,
+      20260916,
+      "CAD"
+    ],
+    [
+      0.0,
+      20260917,
+      "CAD"
+    ],
+    [
+      0.0,
+      20260918,
+      "CAD"
+    ],
+    [
+      0.0,
+      20260919,
+      "CAD"
+    ]
+  ]
+}

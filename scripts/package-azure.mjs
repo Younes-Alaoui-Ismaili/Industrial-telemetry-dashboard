@@ -1,0 +1,15 @@
+import { cp, mkdir, readFile, writeFile } from 'node:fs/promises';
+import { spawnSync } from 'node:child_process';
+import { resolve } from 'node:path';
+const destination=resolve(process.argv[2] ?? '.azure-package');
+if(destination===process.cwd())throw new Error('Choose an empty packaging directory');
+await mkdir(destination,{recursive:false});
+for(const file of ['package.json','package-lock.json','migrations','dist'])await cp(resolve('api',file),resolve(destination,file),{recursive:true,errorOnExist:true});
+await cp(resolve('dist'),resolve(destination,'public'),{recursive:true,errorOnExist:true});
+const npm=process.env.npm_execpath;
+if(!npm)throw new Error('Run through npm run package:azure');
+const result=spawnSync(process.execPath,[npm,'ci','--omit=dev','--no-audit','--no-fund'],{cwd:destination,stdio:'inherit'});
+if(result.status!==0)throw new Error('Production dependency installation failed');
+const packageJson=JSON.parse(await readFile(resolve(destination,'package.json'),'utf8'));
+await writeFile(resolve(destination,'build-info.json'),JSON.stringify({version:packageJson.version,revision:process.env.SOURCE_REVISION ?? process.env.GITHUB_SHA ?? 'local-unpublished',built_at:new Date().toISOString()},null,2));
+console.log('Azure package created: '+destination);
