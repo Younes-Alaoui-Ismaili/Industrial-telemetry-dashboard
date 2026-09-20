@@ -26,19 +26,20 @@ interface SourceSelectorProps {
 }
 
 export function SourceSelector({ value, onChange }: SourceSelectorProps) {
+  const cloudEvidenceUrl = import.meta.env.VITE_CLOUD_EVIDENCE_URL;
   const cloudDashboardUrl = import.meta.env.VITE_CLOUD_DASHBOARD_URL;
   return (
     <fieldset className="flex flex-col gap-0.5">
       <legend className="text-[10px] uppercase tracking-wider text-hmi-muted">Data source</legend>
-      <div className="flex border border-hmi-grid">
+      <div className="flex flex-wrap border border-hmi-grid">
         {OPTIONS.map((option) => {
-          if (option.id === 'cloud' && cloudDashboardUrl) {
+          if (option.id === 'cloud' && (cloudEvidenceUrl || cloudDashboardUrl)) {
             return <a
               key={option.id}
-              href={cloudDashboardUrl}
-              title="Open the Azure dashboard. Microsoft sign-in required."
+              href={cloudEvidenceUrl || cloudDashboardUrl}
+              title={cloudEvidenceUrl ? 'Recorded Azure demonstration with synthetic measurements. No live cloud connection.' : 'Open the Azure dashboard. Microsoft sign-in required.'}
               className="block border-r border-hmi-grid px-3 py-1 font-mono text-xs uppercase tracking-wide text-hmi-secondary last:border-r-0 focus-visible:ring-1 focus-visible:ring-hmi-secondary"
-            >Cloud</a>;
+            >{cloudEvidenceUrl ? 'Cloud video' : 'Cloud'}</a>;
           }
           const selected = option.id === value;
           return (

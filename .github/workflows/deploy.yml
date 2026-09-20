@@ -31,9 +31,12 @@ jobs:
         run: npm ci
 
       - name: Build
-        run: npm run build
+        run: |
+          npm run build
+          cp evidence/azure/cloud-browser-20260919.webm dist/cloud-proof.webm
+          cmp evidence/azure/cloud-browser-20260919.webm dist/cloud-proof.webm
         env:
-          VITE_CLOUD_DASHBOARD_URL: https://telemetry-proof-yai-20260909-us.azurewebsites.net/?source=cloud
+          VITE_CLOUD_EVIDENCE_URL: ./cloud-proof.webm
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3

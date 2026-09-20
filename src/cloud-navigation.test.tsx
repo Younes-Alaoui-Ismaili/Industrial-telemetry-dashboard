@@ -54,3 +54,30 @@ describe('Cloud navigation', () => {
     expect(screen.getByRole('link', { name: 'Sign in with Microsoft' })).toHaveAttribute('href', '/.auth/login/aad?post_login_redirect_uri=/?source=cloud');
   });
 });
+
+
+describe('Archived Cloud evidence', () => {
+  it('replaces the live link with an explicitly recorded video, even if both URLs are configured', () => {
+    vi.stubEnv('VITE_CLOUD_EVIDENCE_URL', './cloud-proof.webm');
+    vi.stubEnv('VITE_CLOUD_DASHBOARD_URL', azureUrl);
+    const onChange = vi.fn();
+    render(<SourceSelector value="simulated" onChange={onChange} />);
+    const link = screen.getByRole('link', { name: 'Cloud video' });
+    expect(link).toHaveAttribute('href', './cloud-proof.webm');
+    expect(link).toHaveAttribute('title', expect.stringContaining('Recorded'));
+    expect(screen.queryByRole('link', { name: 'Cloud' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('radio', { name: 'Cloud' })).not.toBeInTheDocument();
+    expect(onChange).not.toHaveBeenCalled();
+  });
+  it('keeps old cloud deep links in autonomous mode without any API request', () => {
+    vi.stubEnv('VITE_CLOUD_EVIDENCE_URL', './cloud-proof.webm');
+    vi.stubEnv('VITE_CLOUD_DASHBOARD_URL', '');
+    window.history.replaceState({}, '', '/?source=cloud');
+    const fetch = vi.fn().mockRejectedValue(new Error('No API on Pages'));
+    vi.stubGlobal('fetch', fetch);
+    render(<App />);
+    expect(screen.getByRole('radio', { name: 'Simulated' })).toBeChecked();
+    expect(screen.getByRole('link', { name: 'Cloud video' })).toBeInTheDocument();
+    expect(fetch).not.toHaveBeenCalled();
+  });
+});

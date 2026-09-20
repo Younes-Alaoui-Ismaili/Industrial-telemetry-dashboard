@@ -2,6 +2,10 @@
 
 These records come from an actual App Service application and Azure SQL database. Measurements are synthetic, produced by a finite MCP scenario. This is a personal demonstration, with no customer or production deployment claim. Inference runs on the local workstation, not in Azure.
 
+## Public playback independent of Azure
+
+[Play the retained Azure video](https://younes-alaoui-ismaili.github.io/Industrial-telemetry-dashboard/cloud-proof.webm). GitHub Pages serves a byte-identical copy of the recording stored in this directory. The dashboard's **Cloud video** control opens this recording instead of the live Azure deployment. This prepares service retirement; it does not assert that the Azure subscription has been cancelled. The historical navigation checks below describe the earlier live-link configuration.
+
 ## Browser recording and recheck, September 19
 
 [Watch the cloud browser recording](cloud-browser-20260919.webm). The recording shows the real authenticated Azure dashboard with Operator access, two simulated alarms, an acknowledgement and a page reload. The acknowledged vibration alarm leaves the open list; the temperature alarm remains unacknowledged. [Independent API verification](cloud-browser-20260919.json) confirms the persisted acknowledgement. The recording starts after sign-in and does not show credential entry. It is silent and is not a recording of Younes operating the application.

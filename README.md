@@ -30,7 +30,7 @@ Eight machines report temperature, vibration, pressure, speed and cycle counts. 
 
 A selector in the header chooses where the readings come from.
 
-- **Cloud**. On GitHub Pages, this link opens the separate Azure dashboard, which requires an authorized Microsoft account. On Azure or a local API deployment, it selects the authenticated API with SQL persistence. The screen distinguishes a local API from Azure and shows unavailable on source failure. [Setup and limits](docs/persistent-telemetry.md).
+- **Cloud video** on GitHub Pages opens the [recorded Azure demonstration](https://younes-alaoui-ismaili.github.io/Industrial-telemetry-dashboard/cloud-proof.webm), served by Pages from the retained GitHub video. This is recorded synthetic telemetry, not a live connection; no Azure account or running Azure service is required. On Azure or a local API deployment, it selects the authenticated API with SQL persistence. The screen distinguishes a local API from Azure and shows unavailable on source failure. [Setup and limits](docs/persistent-telemetry.md).
 - **Simulated** (default). The built in simulator. Nothing to install, nothing to configure, and it is what the live demo above runs on.
 - **MCP live**. Real readings from a telemetry [MCP](https://modelcontextprotocol.io) server, reached through a small local bridge. The dashboard calls the server's own tools: `list_devices`, `get_telemetry`, `get_anomalies` and `simulate_fault`. Alarms in this mode are the ones the server detected, carrying the threshold the server itself crossed. Injecting a fault sends `simulate_fault` to the server and the readings move because the server moved them.
 
@@ -73,7 +73,7 @@ The public React workspace adapts the organization of the [ThingsBoard thermosta
 
 ## Features
 
-- **Three source paths**: the browser simulator, a local telemetry MCP bridge, and an authenticated persistent API. GitHub Pages opens the separate Azure deployment for the Cloud path.
+- **Three source paths**: the browser simulator, a local telemetry MCP bridge, and an authenticated persistent API. GitHub Pages offers the recorded Cloud video instead of an Azure connection.
 - **Equipment table**: eight simulated machines with plant tags, search, state, temperature/vibration readings, units and update times.
 - **Asset faceplate**: click any machine for a dialog over the running screen, carrying a full trend for every metric it has with its warning and alarm limits, plus that machine's alarms. The table stays an overview; nothing about one machine is left unreachable.
 - **Fleet history**: temperature and vibration charts compare all available equipment, with min/max/latest statistics independent of the search filter.
