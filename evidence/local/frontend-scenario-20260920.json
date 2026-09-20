@@ -1,0 +1,82 @@
+{
+  "recordedDate": "2026-09-20",
+  "interface": "Current light industrial React frontend",
+  "source": "Public GitHub Pages browser simulator",
+  "sourceUrl": "https://younes-alaoui-ismaili.github.io/Industrial-telemetry-dashboard/",
+  "sourceBaseCommit": "f9b18f7e6f6ffa14c349deb14e9587ba60919f3c",
+  "role": "Narrative operator role; no authenticated Reader/Operator permission demonstration",
+  "measurements": "Synthetic browser data only; no physical sensors, SQL or Azure",
+  "method": "Actual browser screenshots sampled approximately four times per second, resampled to 25 fps WebM. French editorial captions in a separate strip; no generated or altered UI pixels. Silent.",
+  "sourceFrames": 206,
+  "durationSeconds": 30.28,
+  "width": 1600,
+  "height": 1120,
+  "removedUnrecordedGapSeconds": 11.179999828338623,
+  "sha256": "c31ad5d0db06f89214f7124b51e63b4702c7e806e864efc379f622f41a6855ff",
+  "segments": [
+    {
+      "name": "overview",
+      "sourceStart": 1789935780.178,
+      "sourceEnd": 1789935784.266,
+      "speed": 1,
+      "outputStart": 0,
+      "outputEnd": 4.088000059127808,
+      "title": "Surveiller PRESS-01 : courbes actives dès le départ"
+    },
+    {
+      "name": "inject",
+      "sourceStart": 1789935784.266,
+      "sourceEnd": 1789935793.756,
+      "speed": 3,
+      "outputStart": 4.088000059127808,
+      "outputEnd": 7.251333395640055,
+      "title": "Déclencher une surchauffe simulée"
+    },
+    {
+      "name": "inspect",
+      "sourceStart": 1789935793.756,
+      "sourceEnd": 1789935801.315,
+      "speed": 1,
+      "outputStart": 7.251333395640055,
+      "outputEnd": 14.810333410898844,
+      "title": "Identifier le dépassement du seuil"
+    },
+    {
+      "name": "acknowledge",
+      "sourceStart": 1789935812.495,
+      "sourceEnd": 1789935818.285,
+      "speed": 1,
+      "outputStart": 14.810333410898844,
+      "outputEnd": 20.60033361117045,
+      "title": "Acquitter : l’alarme reste active"
+    },
+    {
+      "name": "recover",
+      "sourceStart": 1789935818.285,
+      "sourceEnd": 1789935840.657,
+      "speed": 4,
+      "outputStart": 20.60033361117045,
+      "outputEnd": 26.19333360592524,
+      "title": "Observer la fin de la panne simulée"
+    },
+    {
+      "name": "result",
+      "sourceStart": 1789935840.657,
+      "sourceEnd": 1789935844.713,
+      "speed": 1,
+      "outputStart": 26.19333360592524,
+      "outputEnd": 30.249333600203194,
+      "title": "Retour normal : aucune alarme ouverte"
+    }
+  ],
+  "acknowledgedWhileActive": "Alarms\n1 open\n\n■\nPRESS-01\nALARM\n\ntemperature 83.9 C past 77.0 C\n\n16:23:04 · 0:31 · Acknowledged",
+  "returnedToNormal": "Alarms\n0 open\n\nNo active alarms. Fleet within limits.",
+  "playbackVerification": {
+    "currentTime": 30.28,
+    "duration": 30.28,
+    "ended": true,
+    "error": null,
+    "height": 1120,
+    "width": 1600
+  }
+}

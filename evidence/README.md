@@ -4,7 +4,7 @@ The API acceptance recordings below use synthetic measurements, a real local SQL
 
 ## Current front-end walkthrough
 
-[Play the current front-end demo](https://younes-alaoui-ismaili.github.io/Industrial-telemetry-dashboard/frontend-demo.webm), [retained file](local/frontend-walkthrough-20260920.webm), [provenance](local/frontend-walkthrough-20260920.json). This recording shows the light industrial interface: equipment overview, PRESS-01 fault, machine details, acknowledgement, temperature/vibration history and return to normal. It runs only the browser simulator from a local production build. No SQL, Azure or physical sensors are used in this video. Original captured screens; silent; idle gaps over four seconds shortened.
+[Play the current front-end demo](https://younes-alaoui-ismaili.github.io/Industrial-telemetry-dashboard/frontend-demo.webm?v=scenario-20260920), [retained file](local/frontend-scenario-20260920.webm), [provenance](local/frontend-scenario-20260920.json). A 30.28-second operator scenario recorded from the public browser simulator: graphs visible immediately, PRESS-01 overheating, threshold inspection, acknowledgement while active, and return to normal. French scene captions identify the narrative operator role and synthetic data. Waiting sections are explicitly marked x3 and x4; inspection and acknowledgement remain at x1. An unrecorded gap between inspection and acknowledgement is cut. Screen pixels come from actual browser captures; captions occupy a separate strip. No physical sensors, SQL, Azure, authenticated role demonstration or generated UI frames. Silent. The previous 59.84-second recording remains archived as `local/frontend-walkthrough-20260920.webm`.
 
 ## Recorded API paths
 
