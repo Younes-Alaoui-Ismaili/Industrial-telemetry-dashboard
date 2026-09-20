@@ -1,0 +1,36 @@
+{
+  "capturedAtUtc": "2026-09-20T17:49:39.7880000+00:00",
+  "scope": "Local ThingsBoard CE 4.3.1.5, historical synthetic Azure copy",
+  "file": "thingsboard-walkthrough-20260920.webm",
+  "bytes": 2924727,
+  "sha256": "beedf95ddd92a2e786383f37026bc7b7a8e16137527df37f6ea6a8961248230b",
+  "captureMethod": "Chrome DevTools Protocol Page.startScreencast, real browser JPEG frames, FFmpeg image2pipe mjpeg to VP8 WebM at 25 fps",
+  "sourceFrames": 30,
+  "sourceElapsedSeconds": 87.3760359287262,
+  "editing": "Idle gaps capped at 6 seconds; no generated screen content; no audio",
+  "walkthrough": [
+    "Four equipment readings and source timestamps",
+    "Temperature history and tooltip, maximum shown 88.3 C",
+    "Vibration history and tooltip, maximum shown 6.96 mm/s",
+    "Historical temperature alarm details: originator, raised time, duration and imported status"
+  ],
+  "azureRequestsDuringCapture": 0,
+  "azureWrites": 0,
+  "alarmAcknowledgementPerformed": false,
+  "playbackVerification": {
+    "currentTime": 58.64,
+    "duration": 58.64,
+    "ended": true,
+    "error": null,
+    "height": 700,
+    "paused": true,
+    "readyState": 4,
+    "width": 1603
+  },
+  "limitations": [
+    "Historical synthetic data, not live industrial acquisition",
+    "Local PostgreSQL and ThingsBoard; this video is not an Azure deployment recording",
+    "Some alarm detail fields require scrolling; not every field is visible in the film"
+  ],
+  "upstreamDashboard": "https://github.com/thingsboard/thingsboard/blob/v4.3.1.5/application/src/main/data/json/demo/dashboards/thermostats.json"
+}

@@ -37,6 +37,9 @@ jobs:
       - name: Test
         run: npm test
 
+      - name: ThingsBoard dashboard template tests
+        run: node --test infra/thingsboard/dashboard.test.mjs
+
       - name: Build
         run: npm run build
 

@@ -2,6 +2,10 @@
 
 # Industrial Telemetry Dashboard
 
+**Local ThingsBoard edition:** a native ThingsBoard dashboard with equipment, temperature/vibration history and imported Azure alarm states is available through the [local installation and operating guide](infra/thingsboard/README.md). It uses a retained copy of synthetic Azure measurements with original timestamps; it does not require continuous Azure polling or replace the public React demo.
+
+[Watch the local ThingsBoard walkthrough](evidence/local/thingsboard-walkthrough-20260920.webm): equipment overview, temperature and vibration peaks, and alarm details. Silent browser capture, about 59 seconds, with idle gaps shortened. Historical synthetic data copied from Azure; no live cloud acquisition or alarm acknowledgement in this recording. [Recording provenance](evidence/local/thingsboard-walkthrough-20260920.json).
+
 [Watch the recorded Azure walkthrough](evidence/azure/cloud-browser-20260919.webm): authenticated cloud data, alarm acknowledgement and reload. Synthetic measurements, personal demonstration; [verification and limitations](evidence/azure/README.md).
 
 **Persistent API extension:** SQL history, server-owned alarms, Reader/Operator access and a third Cloud source are documented in [the local setup](docs/persistent-telemetry.md). [Actual Azure acceptance evidence](evidence/azure/README.md) covers authenticated SQL access, persistent acknowledgement, restart, rollback, a temporary SQL access incident and export/import recovery. [Azure operations](docs/azure-operations.md) provides reproduction procedures. The public demo below uses the simulator; the Azure proof is a separate, access-controlled personal demonstration. [Local recordings](evidence/README.md) remain available and are labelled as local.
@@ -47,7 +51,7 @@ cp .env.example .env      # then point TELEMETRY_MCP_ARGS at your telemetry serv
 node --env-file=.env src/index.js
 ```
 
-The bridge refuses to start without `TELEMETRY_MCP_COMMAND`, rather than guessing a path and reporting a connection failure that is really a configuration failure. No machine specific path is stored in this repository.
+The bridge refuses to start without `TELEMETRY_MCP_COMMAND`, rather than guessing a path and reporting a connection failure that is really a configuration failure. The bridge reads machine-specific paths from its ignored local environment file.
 
 With the bridge running, start the dashboard as usual and pick **MCP live** in the header.
 
@@ -180,4 +184,4 @@ npm run capture                            # both the GIF and the screenshots
 
 ## License
 
-Released under the [MIT License](LICENSE).
+The original application is released under the [MIT License](LICENSE). The reused ThingsBoard dashboard template and its adaptation retain the [Apache-2.0 license](infra/thingsboard/LICENSE-ThingsBoard.txt); see [source attribution](infra/thingsboard/README.md#reused-sources).
