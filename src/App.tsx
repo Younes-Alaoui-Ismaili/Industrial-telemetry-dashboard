@@ -1,7 +1,7 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { StatusBar } from './components/Dashboard/StatusBar';
-import { AssetTile } from './components/Dashboard/AssetTile';
-import { TrendChart } from './components/Dashboard/TrendChart';
+import { EquipmentTable } from './components/Dashboard/EquipmentTable';
+import { FleetHistoryChart } from './components/Dashboard/FleetHistoryChart';
 import { AlarmsPanel } from './components/Dashboard/AlarmsPanel';
 import { AssetFaceplate } from './components/Dashboard/AssetFaceplate';
 import { ConnectMcpModal } from './components/Dashboard/ConnectMcpModal';
@@ -16,36 +16,7 @@ import { probeBridge } from './lib/bridgeProbe';
 import { useBootPhase } from './hooks/useBootPhase';
 import { useChartsPainted } from './hooks/useChartsPainted';
 import type { DataSourceId } from './types/mcp';
-import {
-  CRITICAL_TREND_COUNT,
-  pickCriticalTrends,
-  type TrendCandidate,
-} from './lib/trendPriority';
-
-/**
- * Screen layout follows the usual supervision hierarchy: the header answers "is
- * the plant normal", the grid answers "which machine", and the trends answer "how
- * bad and for how long". All three are about the plant, so the trend pane shows
- * the fleet's most critical metrics and is steered by nothing.
- *
- * One machine in depth is a different question and lives one layer up, in the
- * faceplate a tile opens. That separation is the point: a pane sized for the
- * overview cannot hold every metric of every asset, and the version that tried
- * silently showed the first two and dropped the rest.
- *
- * Two data sources feed the same components. The simulator is the default and
- * needs nothing installed; the live source reads a real telemetry MCP server
- * through a local bridge. Both hooks always run, because hooks cannot be called
- * conditionally, but the live one does no work until it is selected.
- *
- * Picking the live source probes the bridge first. Only a bridge that answers
- * switches the source; one that does not opens a short connect guide, and the
- * source never leaves the simulator, so the header and the selector have
- * nothing to roll back. A live session that later loses its bridge keeps the
- * banner: the screen keeps running on the simulator and says so twice, in the
- * banner and in the header. It never shows simulated readings under a live
- * label.
- */
+/** ThingsBoard-inspired workspace, preserving source and alarm contracts. */
 function App() {
   const [source, setSource] = useState<DataSourceId>(() => !import.meta.env.VITE_CLOUD_DASHBOARD_URL && new URLSearchParams(window.location.search).get('source') === 'cloud' ? 'cloud' : 'simulated');
 
@@ -105,19 +76,6 @@ function App() {
     connectOpenerRef.current = null;
   }, []);
 
-  /**
-   * Last render's picks, fed back in so the zone holds still between ticks. Read
-   * inside the memo and written from an effect, never during a render.
-   */
-  const previousPicks = useRef<TrendCandidate[]>([]);
-  const criticalTrends = useMemo(
-    () => pickCriticalTrends(assets, CRITICAL_TREND_COUNT, previousPicks.current),
-    [assets],
-  );
-  useEffect(() => {
-    previousPicks.current = criticalTrends;
-  }, [criticalTrends]);
-
   const faceplateAsset = assets.find((a) => a.spec.id === faceplateId);
 
   const closeFaceplate = useCallback(() => {
@@ -155,8 +113,7 @@ function App() {
   const bootReady = source === 'cloud' ? cloud.connection.status !== 'connecting' :
     source === 'mcp'
       ? mcp.connection.status !== 'connecting'
-      : criticalTrends.length > 0 &&
-        (history[`${criticalTrends[0].assetId}:${criticalTrends[0].spec.key}`]?.length ?? 0) > 0;
+      : assets.some(asset => (history[`${asset.spec.id}:temperature`]?.length ?? 0) > 0);
 
   const boot = useBootPhase(bootReady);
 
@@ -179,7 +136,7 @@ function App() {
   ];
 
   return (
-    <div className="min-h-screen bg-hmi-page text-hmi-primary" aria-busy={boot.mounted}>
+    <div className="industrial-app min-h-screen bg-hmi-page text-hmi-primary" aria-busy={boot.mounted}>
       <StatusBar
         assets={assets}
         alarms={alarms}
@@ -192,67 +149,17 @@ function App() {
       {source === 'mcp' ? <SourceBanner connection={mcp.connection} /> : null}
       {source === 'cloud' ? <CloudSourcePanel connection={cloud.connection} deployment={cloud.deployment} isOperator={cloud.isOperator} report={cloud.report} onToken={setCloudToken} /> : null}
 
-      <main className="mx-auto max-w-[1600px] px-4 py-4">
-        <div className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1fr)_360px]">
-          <div className="space-y-4">
-            <section aria-label="Fleet">
-              <h2 className="mb-2 text-xs font-semibold uppercase tracking-widest text-hmi-secondary">
-                Fleet
-              </h2>
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
-                {assets.map((asset) => (
-                  <div
-                    key={asset.spec.id}
-                    role="button"
-                    tabIndex={0}
-                    aria-haspopup="dialog"
-                    onClick={(e) => openFaceplate(asset.spec.id, e.currentTarget)}
-                    onKeyDown={(e) => {
-                      // A key pressed on the inject button belongs to the
-                      // button. Its click stops here, but the keystroke that
-                      // produced the click travels on its own and would open
-                      // the dialog behind it.
-                      if (e.target !== e.currentTarget) return;
-                      if (e.key === 'Enter' || e.key === ' ') {
-                        e.preventDefault();
-                        openFaceplate(asset.spec.id, e.currentTarget);
-                      }
-                    }}
-                    className="cursor-pointer focus:outline-none focus-visible:ring-1 focus-visible:ring-hmi-secondary"
-                  >
-                    <AssetTile asset={asset} history={history} onInjectFault={injectFault} />
-                  </div>
-                ))}
-              </div>
-            </section>
-
-            {assets.length > 0 ? (
-              <section aria-label="Fleet critical trends" className="space-y-3" ref={trendsRef}>
-                <div className="flex items-baseline justify-between gap-3">
-                  <h2 className="text-xs font-semibold uppercase tracking-widest text-hmi-secondary">
-                    Fleet critical trends
-                  </h2>
-                  <p className="truncate text-xs text-hmi-muted">
-                    The two metrics closest to their limits, fleet wide. Open a machine for all of
-                    its trends.
-                  </p>
-                </div>
-                <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
-                  {criticalTrends.map(({ assetId, spec }) => (
-                    <TrendChart
-                      key={`${assetId}:${spec.key}`}
-                      assetId={assetId}
-                      spec={spec}
-                      samples={history[`${assetId}:${spec.key}`] ?? []}
-                    />
-                  ))}
-                </div>
-              </section>
-            ) : null}
-          </div>
-
+      <main className="industrial-main">
+        <div className="workspace-heading"><div><h2>Process overview</h2><p>{source === 'simulated' || fallback ? 'Autonomous demonstration · Synthetic measurements generated in your browser' : 'Source status and provenance are shown above'}</p></div><a href="https://github.com/Younes-Alaoui-Ismaili/Industrial-telemetry-dashboard/tree/main/evidence">Recorded evidence</a></div>
+        <div className="overview-grid">
+          <EquipmentTable assets={assets} onOpen={openFaceplate} onInjectFault={injectFault} />
           <AlarmsPanel dataAvailable={source !== 'cloud' || cloud.connection.status === 'live'} alarms={alarms} now={lastUpdate} onAcknowledge={acknowledge} canAcknowledge={canAcknowledge} emptyText={source === 'cloud' && cloud.connection.status !== 'live' ? 'Alarm source unavailable.' : undefined} />
         </div>
+        {assets.length > 0 ? <section aria-label="Fleet history" className="history-grid" ref={trendsRef}>
+          <FleetHistoryChart assets={assets} history={history} metric="temperature" />
+          <FleetHistoryChart assets={assets} history={history} metric="vibration" />
+        </section> : null}
+        <footer className="workspace-footer">Industrial process monitoring · Browser simulator / MCP / authenticated API<span>Layout inspired by ThingsBoard · Independent React demonstration</span></footer>
       </main>
 
       {faceplateAsset ? (

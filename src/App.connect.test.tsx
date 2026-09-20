@@ -70,7 +70,7 @@ describe('connect guide', () => {
 
     expectSimulatedEverywhere();
     // The simulated fleet never blinked.
-    expect(screen.getAllByRole('article')).toHaveLength(8);
+    expect(screen.getAllByRole('row', { name: /equipment$/ })).toHaveLength(8);
   });
 
   it('closes on Stay in simulated mode and hands focus back to the selector', async () => {

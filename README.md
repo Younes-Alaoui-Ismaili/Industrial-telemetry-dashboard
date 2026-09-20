@@ -1,6 +1,8 @@
-![Industrial telemetry dashboard banner](docs/banner.jpg)
+![Public industrial dashboard with equipment, alarms and history](docs/screenshots/public-industrial-20260920.png)
 
 # Industrial Telemetry Dashboard
+
+**Public industrial workspace:** the [interactive demo](https://younes-alaoui-ismaili.github.io/Industrial-telemetry-dashboard/) now presents a searchable equipment table, alarms and fleet temperature/vibration history. The simulator runs entirely in the browser and does not require Azure, a ThingsBoard server or sign-in. Data is synthetic and labelled on screen.
 
 **Local ThingsBoard edition:** a native ThingsBoard dashboard with equipment, temperature/vibration history and imported Azure alarm states is available through the [local installation and operating guide](infra/thingsboard/README.md). It uses a retained copy of synthetic Azure measurements with original timestamps; it does not require continuous Azure polling or replace the public React demo.
 
@@ -20,9 +22,7 @@
 
 **[Live demo](https://younes-alaoui-ismaili.github.io/Industrial-telemetry-dashboard/)**
 
-![A fault injected on PRESS-01, the alarm raised, acknowledged, and cleared when the fault window closes](docs/demo.gif)
-
-72 seconds, real time, no cuts and no speed up: a healthy fleet, a fault injected on `PRESS-01`, the alarm raised on the next tick and climbing, the acknowledgement, then the return to normal when the 30 second fault window closes. Captured from the production build by `npm run capture`, one frame per simulator tick.
+[Earlier interface walkthrough](docs/demo.gif): archived recording of the original dark interface and simulator alarm lifecycle. The current public layout is shown above.
 
 Eight machines report temperature, vibration, pressure, speed and cycle counts. Every reading is compared against its own warning and alarm limits, and any crossing raises an alarm that tracks its own peak, duration and acknowledgement state. An **Inject fault** control on each machine drives a metric past its limit on demand, so the whole path from healthy fleet to raised alarm to acknowledgement can be demonstrated in about a minute.
 
@@ -57,38 +57,26 @@ With the bridge running, start the dashboard as usual and pick **MCP live** in t
 
 ## Design
 
-The screen follows the conventions of high performance industrial supervision rather than general purpose dashboard styling:
+The public React workspace adapts the organization of the [ThingsBoard thermostat dashboard](https://github.com/thingsboard/thingsboard/blob/v4.3.1.5/application/src/main/data/json/demo/dashboards/thermostats.json): blue masthead, light surfaces, equipment and alarms above fleet history. It is an independent React implementation. The native ThingsBoard edition and its Apache-2.0 template remain separately documented in [infra/thingsboard](infra/thingsboard/README.md).
 
-- **Neutral until abnormal.** Normal operation is rendered in desaturated greys. Colour is spent only on warning and alarm states, so an excursion is the only coloured thing on screen. There is deliberately no per metric colour coding and no "healthy green".
-- **State is never colour alone.** Every state carries a written label and a distinct shape as well as a colour, which keeps it readable with colour vision deficiency, on a washed out panel, and in print.
-- **Limits are drawn on the trends.** A bare curve says a number moved; a curve with its warning line, alarm line and exceedance band says whether that matters.
-- **Stable numerals.** Readings use tabular figures with a fixed number of decimals, so digits do not shift as values update. No web fonts are loaded.
-- **Density over decoration.** Sharp borders and tight spacing instead of large rounded cards, no 3D, no gauges, no decorative iconography, and no animation on normal states.
+- Search equipment by tag or name, then open its complete measurement faceplate.
+- Compare temperature and vibration across equipment with labelled series and min/max/latest statistics. Lines connect successive available samples; no zero samples are inserted when an asset has no reading at another asset's timestamp.
+- Inspect warning/alarm thresholds in each equipment faceplate; the overview charts show fleet history, not a common threshold for unlike machines.
+- Read written states and shaped indicators alongside severity colours. The interface uses tabular numerals, system fonts and visible keyboard focus.
+- On narrow screens the panels stack and the equipment table scrolls within its own panel.
 
-Contrast is held to WCAG AA mechanically: `src/lib/contrast.test.ts` computes the ratio for every ink and surface pair and fails the build if any text pair drops below 4.5:1.
+`src/lib/contrast.test.ts` checks the theme text/surface pairs, including alarm and warning text. This automated check is not a complete accessibility certification.
 
 ## Screenshots
 
-Full page captures of the production build, taken by the same pipeline as the animation above. The animation is cropped to the fold; these show the trend panel underneath it.
-
-**Healthy fleet.** Desaturated throughout, no colour anywhere, which is what makes an excursion impossible to miss.
-
-![Eight machines running normally, no open alarms](docs/screenshots/01-fleet-healthy.png)
-
-**Alarm raised.** `PRESS-01` past its temperature limit: the tile carries a written state and a shaped indicator as well as colour, the trend draws the warning line, the alarm line and the exceedance band, and the alarm row states the peak and the threshold it crossed.
-
-![PRESS-01 in fault with one open unacknowledged alarm](docs/screenshots/02-alarm-raised.png)
-
-**Acknowledged.** Acknowledging is a state transition, not a deletion: the alarm stays on the list until it has both cleared and been acknowledged.
-
-![The same alarm, now marked acknowledged](docs/screenshots/03-alarm-acknowledged.png)
+[Current public layout](docs/screenshots/public-industrial-20260920.png), captured from the local browser simulator during release verification. The [older dark-interface screenshots](docs/screenshots/01-fleet-healthy.png) are retained as historical evidence.
 
 ## Features
 
-- **Two data sources**: the built in simulator, and live readings from a telemetry MCP server through a local bridge, behind one selector and one component contract.
-- **Fleet grid**: eight machines with plant style tags, each showing state, live readings with units, and a micro trend.
-- **Asset faceplate**: click any machine for a dialog over the running screen, carrying a full trend for every metric it has with its warning and alarm limits, plus that machine's alarms. The grid stays an overview; nothing about one machine is left unreachable.
-- **Fleet critical trends**: a fixed pane showing the two metrics closest to their limits across the whole fleet, coupled to no selection.
+- **Three source paths**: the browser simulator, a local telemetry MCP bridge, and an authenticated persistent API. GitHub Pages opens the separate Azure deployment for the Cloud path.
+- **Equipment table**: eight simulated machines with plant tags, search, state, temperature/vibration readings, units and update times.
+- **Asset faceplate**: click any machine for a dialog over the running screen, carrying a full trend for every metric it has with its warning and alarm limits, plus that machine's alarms. The table stays an overview; nothing about one machine is left unreachable.
+- **Fleet history**: temperature and vibration charts compare all available equipment, with min/max/latest statistics independent of the search filter.
 - **Status bar**: assets online, open alarms by severity, availability, and the time of the last update.
 - **Alarm lifecycle**: alarms are raised by threshold crossings and move through unacknowledged, acknowledged, and returned to normal but unacknowledged. Acknowledging is a state transition, never a deletion, so an alarm stays visible until it has both cleared and been acknowledged.
 - **Fault injection**: force a metric past its alarm limit for a bounded window to demonstrate the alarm path end to end.
@@ -104,8 +92,8 @@ flowchart LR
     Sim["useSimulatedData<br/>(2s tick, fault injection)"] --> State[App state]
     Mcp["useMcpData<br/>(5s poll)"] --> State
     State --> Bar[StatusBar + source selector]
-    State --> Grid[AssetTile grid]
-    State --> Trend[TrendChart]
+    State --> Grid[EquipmentTable]
+    State --> Trend[FleetHistoryChart]
     State --> Panel[AlarmsPanel]
     Grid -- "click" --> Face["AssetFaceplate<br/>(dialog, every metric)"]
     State --> Face

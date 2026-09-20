@@ -17,11 +17,11 @@ describe('App', () => {
   // Equivalent of the original "shows the seeded devices".
   it('shows the fleet using plant style tags', () => {
     render(<App />);
-    expect(screen.getByRole('article', { name: /PRESS-01/ })).toBeInTheDocument();
-    expect(screen.getByRole('article', { name: /SPINDLE-02/ })).toBeInTheDocument();
-    expect(screen.getByRole('article', { name: /CONVEYOR-03/ })).toBeInTheDocument();
-    expect(screen.getByRole('article', { name: /PUMP-04/ })).toBeInTheDocument();
-    expect(screen.getAllByRole('article')).toHaveLength(8);
+    expect(screen.getByRole('row', { name: /PRESS-01.*equipment$/ })).toBeInTheDocument();
+    expect(screen.getByRole('row', { name: /SPINDLE-02.*equipment$/ })).toBeInTheDocument();
+    expect(screen.getByRole('row', { name: /CONVEYOR-03.*equipment$/ })).toBeInTheDocument();
+    expect(screen.getByRole('row', { name: /PUMP-04.*equipment$/ })).toBeInTheDocument();
+    expect(screen.getAllByRole('row', { name: /equipment$/ })).toHaveLength(8);
   });
 
   it('never labels a machine as a generic device', () => {
@@ -31,7 +31,7 @@ describe('App', () => {
 
   it('shows readings with their units', () => {
     render(<App />);
-    const press = screen.getByRole('article', { name: /PRESS-01/ });
+    const press = screen.getByRole('row', { name: /PRESS-01.*equipment$/ });
     expect(within(press).getByText('Temp')).toBeInTheDocument();
     expect(within(press).getAllByText('C').length).toBeGreaterThan(0);
     expect(within(press).getByText('mm/s')).toBeInTheDocument();
@@ -63,7 +63,7 @@ describe('App', () => {
 
     it('raises an alarm in the panel when a fault is injected', () => {
       render(<App />);
-      const press = screen.getByRole('article', { name: /PRESS-01/ });
+      const press = screen.getByRole('row', { name: /PRESS-01.*equipment$/ });
 
       act(() => {
         fireEvent.click(within(press).getByRole('button', { name: /inject fault/i }));
@@ -80,7 +80,7 @@ describe('App', () => {
 
     it('states the crossed limit alongside the reading that crossed it', () => {
       render(<App />);
-      const press = screen.getByRole('article', { name: /PRESS-01/ });
+      const press = screen.getByRole('row', { name: /PRESS-01.*equipment$/ });
 
       act(() => {
         fireEvent.click(within(press).getByRole('button', { name: /inject fault/i }));
@@ -98,7 +98,7 @@ describe('App', () => {
     // purpose: acknowledging is a transition, so the row must survive it.
     it('keeps an acknowledged alarm visible and restates it as acknowledged', () => {
       render(<App />);
-      const press = screen.getByRole('article', { name: /PRESS-01/ });
+      const press = screen.getByRole('row', { name: /PRESS-01.*equipment$/ });
 
       act(() => {
         fireEvent.click(within(press).getByRole('button', { name: /inject fault/i }));
@@ -120,7 +120,7 @@ describe('App', () => {
 
     it('drops the alarm from the panel once it both cleared and was acknowledged', () => {
       render(<App />);
-      const press = screen.getByRole('article', { name: /PRESS-01/ });
+      const press = screen.getByRole('row', { name: /PRESS-01.*equipment$/ });
 
       act(() => {
         fireEvent.click(within(press).getByRole('button', { name: /inject fault/i }));
@@ -205,8 +205,8 @@ describe('App', () => {
       );
       expect(screen.queryByTestId('source-banner')).not.toBeInTheDocument();
       // Only the machines the server actually reports.
-      expect(screen.getAllByRole('article')).toHaveLength(1);
-      expect(screen.getByRole('article', { name: /PRESS-01/ })).toBeInTheDocument();
+      expect(screen.getAllByRole('row', { name: /equipment$/ })).toHaveLength(1);
+      expect(screen.getByRole('row', { name: /PRESS-01.*equipment$/ })).toBeInTheDocument();
     });
 
     it('returns to the simulator when the operator switches back', async () => {
@@ -247,7 +247,7 @@ describe('App', () => {
 
       expect(screen.queryByTestId('source-banner')).not.toBeInTheDocument();
       expect(screen.getByTestId('source-label')).toHaveTextContent('Simulated');
-      expect(screen.getAllByRole('article')).toHaveLength(8);
+      expect(screen.getAllByRole('row', { name: /equipment$/ })).toHaveLength(8);
     });
   });
 
@@ -281,7 +281,7 @@ describe('App', () => {
       render(<App />);
       openPress();
 
-      expect(screen.getAllByRole('article')).toHaveLength(8);
+      expect(screen.getAllByRole('row', { name: /equipment$/ })).toHaveLength(8);
     });
 
     it('closes on Escape and hands focus back to the card that opened it', () => {
@@ -315,7 +315,7 @@ describe('App', () => {
 
     it('leaves the fleet trend zone alone, whichever machine is opened', () => {
       render(<App />);
-      const zone = screen.getByRole('region', { name: 'Fleet critical trends' });
+      const zone = screen.getByRole('region', { name: 'Fleet history' });
       const before = within(zone)
         .getAllByRole('region', { name: /trend$/ })
         .map((region) => region.getAttribute('aria-label'));
@@ -323,7 +323,7 @@ describe('App', () => {
       openPress();
       fireEvent.keyDown(document, { key: 'Escape' });
 
-      const after = within(screen.getByRole('region', { name: 'Fleet critical trends' }))
+      const after = within(screen.getByRole('region', { name: 'Fleet history' }))
         .getAllByRole('region', { name: /trend$/ })
         .map((region) => region.getAttribute('aria-label'));
       expect(after).toEqual(before);
@@ -340,7 +340,7 @@ describe('App', () => {
 
       it('does not open when a fault is injected, and the fault still lands', () => {
         render(<App />);
-        const press = screen.getByRole('article', { name: /PRESS-01/ });
+        const press = screen.getByRole('row', { name: /PRESS-01.*equipment$/ });
 
         act(() => {
           fireEvent.click(within(press).getByRole('button', { name: /inject fault/i }));
@@ -357,7 +357,7 @@ describe('App', () => {
       /** The click stops at the button; the keystroke behind it must too. */
       it('does not open when the inject button is used from the keyboard', () => {
         render(<App />);
-        const press = screen.getByRole('article', { name: /PRESS-01/ });
+        const press = screen.getByRole('row', { name: /PRESS-01.*equipment$/ });
 
         act(() => {
           fireEvent.keyDown(within(press).getByRole('button', { name: /inject fault/i }), {
@@ -373,12 +373,12 @@ describe('App', () => {
 
         act(() => {
           fireEvent.click(
-            within(screen.getByRole('article', { name: /PRESS-01/ })).getByRole('button', {
+            within(screen.getByRole('row', { name: /PRESS-01.*equipment$/ })).getByRole('button', {
               name: /inject fault/i,
             }),
           );
           fireEvent.click(
-            within(screen.getByRole('article', { name: /SPINDLE-02/ })).getByRole('button', {
+            within(screen.getByRole('row', { name: /SPINDLE-02.*equipment$/ })).getByRole('button', {
               name: /inject fault/i,
             }),
           );
@@ -408,7 +408,7 @@ describe('App', () => {
 
         act(() => {
           fireEvent.click(
-            within(screen.getByRole('article', { name: /PUMP-04/ })).getByRole('button', {
+            within(screen.getByRole('row', { name: /PUMP-04.*equipment$/ })).getByRole('button', {
               name: /inject fault/i,
             }),
           );

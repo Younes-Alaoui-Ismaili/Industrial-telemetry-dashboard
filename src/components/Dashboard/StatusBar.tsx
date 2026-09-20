@@ -79,15 +79,9 @@ export function StatusBar({
   const online = onlineCount(assets);
 
   return (
-    <header className="border-b border-hmi-grid bg-hmi-panel">
+    <header className="workspace-status border-b border-hmi-grid bg-hmi-panel">
+      <div className="app-masthead"><h1>Industrial Telemetry Dashboard</h1><span>Process monitoring &amp; analytics</span></div>
       <div className="mx-auto flex max-w-[1600px] flex-wrap items-end gap-x-8 gap-y-4 px-4 py-3">
-        <div className="mr-4">
-          <h1 className="text-sm font-semibold uppercase tracking-widest text-hmi-primary">
-            Industrial Telemetry Dashboard
-          </h1>
-          <p className="text-xs text-hmi-muted">Fleet supervision</p>
-        </div>
-
         <Stat label="Assets online" value={dataAvailable ? `${online}/${assets.length}` : 'Unknown'} />
         <Stat
           label="Alarm"

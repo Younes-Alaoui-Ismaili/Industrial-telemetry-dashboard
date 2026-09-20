@@ -1,3 +1,65 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.industrial-app { font-family: Inter, ui-sans-serif, system-ui, sans-serif; }
+.app-masthead { background: #315779; color: #fff; display:flex; align-items:center; justify-content:space-between; gap:16px; padding:18px 28px; }
+.app-masthead h1 { font-size:18px; font-weight:650; letter-spacing:-.02em; }
+.app-masthead > span { font-size:13px; color:#eef5fc; }
+.workspace-status > div:last-child { max-width:none; padding:18px 28px; align-items:center; }
+.industrial-main { max-width:1760px; margin:auto; padding:24px 28px; }
+.workspace-heading { display:flex; align-items:center; justify-content:space-between; gap:16px; margin-bottom:20px; }
+.workspace-heading h2 { font-size:22px; font-weight:650; letter-spacing:-.025em; }
+.workspace-heading p { color:#526578; font-size:13px; margin-top:4px; }
+.workspace-heading a { font-size:13px; font-weight:600; color:#315779; border:1px solid #a6b6c5; border-radius:6px; padding:12px; white-space:nowrap; }
+.overview-grid { display:grid; grid-template-columns:minmax(0, 1.65fr) minmax(320px, 1fr); gap:18px; align-items:start; }
+.industrial-panel { background:#fff; border:1px solid #d6e0e9; border-radius:9px; box-shadow:0 2px 5px rgb(24 50 75 / 5%); overflow:hidden; min-width:0; }
+.panel-heading { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:18px 20px; border-bottom:1px solid #d6e0e9; }
+.panel-heading h2 { font-size:15px; font-weight:650; }
+.panel-heading p { color:#526578; font-size:12px; margin-top:4px; }
+.panel-heading input { min-width:0; width:175px; border:1px solid #a6b6c5; border-radius:6px; padding:11px 12px; font-size:13px; background:#fff; }
+.equipment-scroll { overflow:auto; max-height:425px; }
+.equipment-table { width:100%; border-collapse:collapse; font-size:12px; white-space:nowrap; }
+.equipment-table thead { position:sticky; top:0; background:#f5f8fb; z-index:1; }
+.equipment-table th { color:#344e65; text-align:left; font-size:11px; font-weight:600; padding:13px 12px; border-bottom:1px solid #d6e0e9; }
+.equipment-table td { padding:6px 12px; border-bottom:1px solid #edf2f7; height:57px; }
+.equipment-table tbody tr:hover { background:#f5f8fb; }
+.equipment-name { min-height:44px; text-align:left; font-weight:650; color:#315779; }
+.equipment-name span { display:block; color:#526578; font-size:11px; font-weight:400; margin-top:3px; }
+.metric-value { font-variant-numeric:tabular-nums; font-size:13px; }
+.metric-value > span:not(.sr-only), .metric-time { color:#526578; font-size:11px; }
+.fault-button { min-height:44px; color:#344e65; padding:6px 10px; border:1px solid #d6e0e9; border-radius:5px; font-size:11px; }
+.fault-button:hover { background:#e5ecf3; }
+.alarm-panel { min-height:220px; max-height:510px; overflow:auto; }
+.alarm-panel > header { min-height:76px; padding:18px 20px; }
+.alarm-panel > header h2 { font-size:15px; text-transform:none; letter-spacing:0; color:#18324b; }
+.alarm-panel > p { padding:50px 18px; font-size:13px; }
+.alarm-panel li { padding:14px 18px; }
+.alarm-panel button { min-width:44px; min-height:44px; border-radius:5px; }
+.history-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:18px; margin-top:18px; }
+.fleet-chart { height:240px; padding:10px 10px 0; }
+.history-summary { padding:8px 20px 16px; overflow-x:auto; }
+.history-summary table { width:100%; font-size:11px; font-variant-numeric:tabular-nums; }
+.history-summary th { text-align:left; font-weight:500; }
+.history-summary th,.history-summary td { padding:5px 4px; }
+.history-summary thead { color:#526578; }
+.history-summary td { text-align:right; }
+.history-summary thead th:not(:first-child) { text-align:right; }
+.history-summary tbody th span { display:inline-block; width:8px; height:8px; border-radius:50%; margin-right:8px; }
+.workspace-footer { display:flex; justify-content:space-between; gap:16px; color:#526578; font-size:11px; margin-top:22px; }
+.industrial-app :is(button,a,input):focus-visible { outline:2px solid #315779; outline-offset:3px; }
+.industrial-app fieldset span,.industrial-app fieldset a { padding-top:12px; padding-bottom:12px; }
+@media(max-width:1200px) { .overview-grid { grid-template-columns:1fr; } .alarm-panel { max-height:310px; min-height:170px; } }
+@media(max-width:700px) {
+  .app-masthead { padding:16px; flex-wrap:wrap; gap:4px; }
+  .app-masthead h1 { font-size:16px; }
+  .app-masthead > span { font-size:11px; }
+  .workspace-status > div:last-child { padding:16px; gap:18px; }
+  .industrial-main { padding:18px 12px; }
+  .workspace-heading { align-items:flex-start; flex-direction:column; }
+  .workspace-heading h2 { font-size:21px; }
+  .panel-heading { align-items:flex-start; flex-direction:column; padding:15px; }
+  .panel-heading input { width:100%; }
+  .history-grid { grid-template-columns:1fr; }
+  .workspace-footer { flex-direction:column; }
+}

@@ -9,7 +9,7 @@
 
       A visitor used to meet a white page for as long as the JavaScript took to
       arrive and run. This paints the dashboard's own surface instead, so the
-      first thing on screen is dark, titled and deliberate rather than blank.
+      first thing on screen uses the workspace palette and a visible title.
 
       Everything is inline: no font file, no stylesheet, no image, no request of
       any kind. A layer meant to precede the bundle cannot afford to wait on a
@@ -30,7 +30,7 @@
         align-items: center;
         justify-content: center;
         gap: 20px;
-        background: #0d0d0d;
+        background: #edf2f7;
         font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
       }
 
@@ -40,13 +40,13 @@
         font-weight: 600;
         letter-spacing: 0.18em;
         text-transform: uppercase;
-        color: #ffffff;
+        color: #18324b;
       }
 
       #boot-shell .boot-subtitle {
         font-size: 12px;
         letter-spacing: 0.02em;
-        color: #8f8d86;
+        color: #526578;
       }
 
       #boot-shell .boot-track {
@@ -54,7 +54,7 @@
         width: 180px;
         height: 2px;
         overflow: hidden;
-        background: #232322;
+        background: #e5ecf3;
       }
 
       #boot-shell .boot-runner {
@@ -63,7 +63,7 @@
         left: 0;
         width: 40%;
         height: 100%;
-        background: #8f8d86;
+        background: #526578;
         animation: boot-sweep 1.1s ease-in-out infinite;
       }
 

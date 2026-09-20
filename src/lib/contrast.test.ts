@@ -59,13 +59,11 @@ describe('palette accessibility', () => {
     expect(contrastRatio(neutralTrace, surface.panel)).toBeGreaterThanOrEqual(AA_LARGE);
   });
 
-  /**
-   * Alarm red does not reach text contrast on this surface. That is expected and
-   * is exactly why severity is written in normal ink beside a coloured mark and an
-   * icon. This test pins that fact so nobody later sets alarm text in red.
-   */
-  it('documents that alarm red is not a text colour here', () => {
-    expect(contrastRatio(status.alarm, surface.panel)).toBeLessThan(AA_TEXT);
+  it('alarm and warning text remain readable on all workspace surfaces', () => {
+    for (const bg of backgrounds) {
+      expect(contrastRatio(status.alarm, bg)).toBeGreaterThanOrEqual(AA_TEXT);
+      expect(contrastRatio(status.warning, bg)).toBeGreaterThanOrEqual(AA_TEXT);
+    }
   });
 
   it('keeps grid and axis lines from disappearing entirely', () => {

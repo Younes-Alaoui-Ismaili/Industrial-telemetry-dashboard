@@ -55,7 +55,7 @@ export function AlarmsPanel({
 
   return (
     <section
-      className="border border-hmi-grid bg-hmi-panel"
+      className="industrial-panel alarm-panel border border-hmi-grid bg-hmi-panel"
       aria-label={ariaLabel}
     >
       <header className="flex items-baseline justify-between border-b border-hmi-grid px-3 py-2">

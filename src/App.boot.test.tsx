@@ -10,7 +10,6 @@ import {
 } from '@testing-library/react';
 import App from './App';
 import { BOOT_CEILING_MS, BOOT_FADE_MS, BOOT_FLOOR_MS } from './hooks/useBootPhase';
-import { HISTORY_LENGTH } from './constants/fleet';
 
 /**
  * The boot experience, asserted at the level a visitor experiences it.
@@ -46,7 +45,7 @@ describe('boot experience', () => {
       render(<App />);
 
       expect(screen.getByTestId('boot-overlay')).toBeInTheDocument();
-      expect(screen.getAllByRole('article')).toHaveLength(8);
+      expect(screen.getAllByRole('row', { name: /equipment$/ })).toHaveLength(8);
       expect(
         screen.getByRole('heading', { name: 'Industrial Telemetry Dashboard' }),
       ).toBeInTheDocument();
@@ -83,25 +82,12 @@ describe('boot experience', () => {
       expect(within(overlay).getByText('Trend buffer primed')).toBeInTheDocument();
     });
 
-    /**
-     * The point of the seeded history, seen from the DOM: a drawn trace before a
-     * single tick has run, not an empty frame waiting for one.
-     *
-     * Asserted on the sparklines rather than the trend charts because the charts
-     * come from a library that measures its container, and jsdom reports every
-     * box as zero, so it draws nothing here whatever the data says. The
-     * sparklines are hand written SVG and render on the data alone. The trend
-     * charts are checked in a real browser instead.
-     */
-    it('has the tile traces already drawn on the first frame', () => {
-      const { container } = render(<App />);
-
-      const traces = container.querySelectorAll('polyline');
-      // One per metric that has history, across all eight tiles.
-      expect(traces.length).toBeGreaterThanOrEqual(8);
-
-      const points = traces[0].getAttribute('points') ?? '';
-      expect(points.trim().split(/\s+/)).toHaveLength(HISTORY_LENGTH);
+    it('has historical statistics available before the first tick', () => {
+      render(<App />);
+      const history = screen.getByRole('table', { name: 'Temperature history statistics' });
+      expect(within(history).getAllByRole('row')).toHaveLength(9);
+      expect(within(history).queryByText('N/A')).not.toBeInTheDocument();
+      expect(within(history).getByRole('row', { name: /PRESS-01/ }).textContent).toContain('°C');
     });
 
     it('is gone well before the ceiling on a healthy boot', () => {
