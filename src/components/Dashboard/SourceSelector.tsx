@@ -1,7 +1,7 @@
 /**
  * Data source selector.
  *
- * Two real radio inputs in a labelled group rather than a pair of styled divs,
+ * Real radio inputs in a labelled group rather than styled divs,
  * so the control is reachable by keyboard and announced as a choice. The visual
  * treatment follows the rest of the screen: the selection is carried by a raised
  * surface and a written state, never by colour alone.
@@ -26,11 +26,20 @@ interface SourceSelectorProps {
 }
 
 export function SourceSelector({ value, onChange }: SourceSelectorProps) {
+  const cloudDashboardUrl = import.meta.env.VITE_CLOUD_DASHBOARD_URL;
   return (
     <fieldset className="flex flex-col gap-0.5">
       <legend className="text-[10px] uppercase tracking-wider text-hmi-muted">Data source</legend>
       <div className="flex border border-hmi-grid">
         {OPTIONS.map((option) => {
+          if (option.id === 'cloud' && cloudDashboardUrl) {
+            return <a
+              key={option.id}
+              href={cloudDashboardUrl}
+              title="Open the Azure dashboard. Microsoft sign-in required."
+              className="block border-r border-hmi-grid px-3 py-1 font-mono text-xs uppercase tracking-wide text-hmi-secondary last:border-r-0 focus-visible:ring-1 focus-visible:ring-hmi-secondary"
+            >Cloud</a>;
+          }
           const selected = option.id === value;
           return (
             <label

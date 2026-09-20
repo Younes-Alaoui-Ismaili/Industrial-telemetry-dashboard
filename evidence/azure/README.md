@@ -42,6 +42,8 @@ The rollback actually replaced frontend asset index-D7N1ilKn.js with index-Cdidt
 
 ## Reproduce and retain the limits
 
+The [September 20 navigation check](cloud-navigation-20260920.json) verifies the corrected static Pages build served locally: Cloud opens the existing Azure dashboard, with Microsoft authentication and four synthetic devices visible. Browser API reads and an independent authenticated health check returned 200. The public Pages site was not updated during this check. An earlier timeout and 503 were followed by recovery without an Azure configuration change; this check does not establish their cause or promise continuous availability.
+
 Follow [Azure operations](../../docs/azure-operations.md) and [API/report contracts](../../docs/persistent-telemetry.md). Use separate Reader and Operator sessions. Publish the finite scenario with the MCP producer, acknowledge an alarm in the browser, record its ID and timestamp, and run the MCP proof before and after the bounded operations. Use an empty, separately named free SQL destination for export/import recovery. Preserve the source and remove temporary workstation firewall access in a finally block.
 
 The actual deployment used the Azure CLI. GitHub Actions with OIDC is prepared locally and has not been published, federated or executed. The SQL recovery was export/import, not point-in-time restore. AllowAzureServices remains a broad Azure-origin firewall rule, protected by Entra and restricted SQL grants; this is not a private endpoint architecture.

@@ -4,6 +4,10 @@ This extension connects the dashboard to a Fastify API and SQL Server. All measu
 
 ## Local setup
 
+The GitHub Pages workflow sets `VITE_CLOUD_DASHBOARD_URL` at build time to the Azure dashboard URL ending in `/?source=cloud`. That static build renders Cloud as a navigation link and keeps the simulator active even if its own URL contains `?source=cloud`; it never attempts an API request on the Pages host. Microsoft authentication happens on Azure. Access is restricted to authorized accounts.
+
+Leave `VITE_CLOUD_DASHBOARD_URL` unset for local API and Azure builds so Cloud continues to use the same-origin API and Microsoft login route. This variable is a public navigation URL, not a credential.
+
 Use Node.js 22 and SQL Server 2022 Developer in Docker. Install the frontend and API independently:
 
 ```sh

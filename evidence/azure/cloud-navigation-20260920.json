@@ -1,0 +1,57 @@
+{
+  "checkedAt": "2026-09-20T15:38:48.9529917Z",
+  "scope": "Local Pages build navigating to existing Azure; no publication or deployment",
+  "localPagesUrl": "http://127.0.0.1:8771/?source=cloud",
+  "azureUrl": "https://telemetry-proof-yai-20260909-us.azurewebsites.net/?source=cloud",
+  "browser": "Codex In-app Browser",
+  "source": "Browser DOM, screenshots, actual click, CDP responses, independent HTTP health check",
+  "pages": {
+    "visualInspection": "passed",
+    "selectedSource": "Simulated",
+    "deepLinkDoesNotActivateCloud": true,
+    "cloudControl": "link",
+    "assets": 8
+  },
+  "navigation": {
+    "connectedStatus": "Connected to Azure. Simulated measurements. Access: Operator.",
+    "azureVisualInspection": "passed",
+    "finalBrowserErrors": [],
+    "destinationVerified": true,
+    "assets": 4,
+    "action": "Clicked Cloud link"
+  },
+  "api": {
+    "deployment": "azure",
+    "role": "Operator",
+    "ready": true,
+    "anonymousHealthStatus": 401,
+    "authenticatedHealthStatus": 200,
+    "observed200Routes": [
+      "/api/v1/health",
+      "/api/v1/devices",
+      "/api/v1/alarms",
+      "/api/v1/report",
+      "/api/v1/telemetry?device_id=conveyor-03",
+      "/api/v1/telemetry?device_id=press-01",
+      "/api/v1/telemetry?device_id=pump-04",
+      "/api/v1/telemetry?device_id=spindle-02"
+    ]
+  },
+  "limitations": [
+    "Synthetic measurements, personal demonstration.",
+    "Earlier timeout and 503 retained in the internal diagnostic; cause not established.",
+    "Initial browser-control delays required fresh DOM observations; final click and connected state succeeded.",
+    "Tests and builds passed during the preceding correction pass; not rerun here.",
+    "Public GitHub Pages not updated."
+  ],
+  "assets": [
+    {
+      "name": "index-cDk4xBfr.js",
+      "sha256": "847c24428c201bf5aff89df2b5274ccdb2da12a8536eb2161be3106f64856647"
+    },
+    {
+      "name": "index-CyY9Opcj.css",
+      "sha256": "5fdb5a949cbc8f8a8fea59df624a23d232a0932b46310da5cd0ec4ada6138e67"
+    }
+  ]
+}

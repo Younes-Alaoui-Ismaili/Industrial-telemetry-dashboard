@@ -47,7 +47,7 @@ import {
  * label.
  */
 function App() {
-  const [source, setSource] = useState<DataSourceId>(() => new URLSearchParams(window.location.search).get('source') === 'cloud' ? 'cloud' : 'simulated');
+  const [source, setSource] = useState<DataSourceId>(() => !import.meta.env.VITE_CLOUD_DASHBOARD_URL && new URLSearchParams(window.location.search).get('source') === 'cloud' ? 'cloud' : 'simulated');
 
   const [cloudToken, setCloudToken] = useState('');
   const cloud = useCloudData({ enabled: source === 'cloud', token: cloudToken });

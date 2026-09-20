@@ -26,7 +26,7 @@ Eight machines report temperature, vibration, pressure, speed and cycle counts. 
 
 A selector in the header chooses where the readings come from.
 
-- **Cloud**. Authenticated application API with SQL persistence. The screen distinguishes a local API from Azure and shows unavailable on source failure. [Setup and limits](docs/persistent-telemetry.md).
+- **Cloud**. On GitHub Pages, this link opens the separate Azure dashboard, which requires an authorized Microsoft account. On Azure or a local API deployment, it selects the authenticated API with SQL persistence. The screen distinguishes a local API from Azure and shows unavailable on source failure. [Setup and limits](docs/persistent-telemetry.md).
 - **Simulated** (default). The built in simulator. Nothing to install, nothing to configure, and it is what the live demo above runs on.
 - **MCP live**. Real readings from a telemetry [MCP](https://modelcontextprotocol.io) server, reached through a small local bridge. The dashboard calls the server's own tools: `list_devices`, `get_telemetry`, `get_anomalies` and `simulate_fault`. Alarms in this mode are the ones the server detected, carrying the threshold the server itself crossed. Injecting a fault sends `simulate_fault` to the server and the readings move because the server moved them.
 
