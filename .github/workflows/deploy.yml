@@ -36,7 +36,7 @@ jobs:
           cp evidence/local/frontend-scenario-20260920.webm dist/frontend-demo.webm
           cmp evidence/local/frontend-scenario-20260920.webm dist/frontend-demo.webm
         env:
-          VITE_DEMO_VIDEO_URL: ./frontend-demo.webm?v=scenario-20260920
+          VITE_DEMO_VIDEO_URL: ./frontend-demo.webm?v=scenario-en-20260920
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
