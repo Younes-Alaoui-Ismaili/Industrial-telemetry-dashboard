@@ -18,7 +18,7 @@ import { useChartsPainted } from './hooks/useChartsPainted';
 import type { DataSourceId } from './types/mcp';
 /** ThingsBoard-inspired workspace, preserving source and alarm contracts. */
 function App() {
-  const [source, setSource] = useState<DataSourceId>(() => !import.meta.env.VITE_CLOUD_EVIDENCE_URL && !import.meta.env.VITE_CLOUD_DASHBOARD_URL && new URLSearchParams(window.location.search).get('source') === 'cloud' ? 'cloud' : 'simulated');
+  const [source, setSource] = useState<DataSourceId>(() => !import.meta.env.VITE_DEMO_VIDEO_URL && !import.meta.env.VITE_CLOUD_DASHBOARD_URL && new URLSearchParams(window.location.search).get('source') === 'cloud' ? 'cloud' : 'simulated');
 
   const [cloudToken, setCloudToken] = useState('');
   const cloud = useCloudData({ enabled: source === 'cloud', token: cloudToken });

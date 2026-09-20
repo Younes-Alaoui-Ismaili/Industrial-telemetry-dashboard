@@ -2,9 +2,9 @@
 
 These records come from an actual App Service application and Azure SQL database. Measurements are synthetic, produced by a finite MCP scenario. This is a personal demonstration, with no customer or production deployment claim. Inference runs on the local workstation, not in Azure.
 
-## Public playback independent of Azure
+## Historical Azure recording
 
-[Play the retained Azure video](https://younes-alaoui-ismaili.github.io/Industrial-telemetry-dashboard/cloud-proof.webm). GitHub Pages serves a byte-identical copy of the recording stored in this directory. The dashboard's **Cloud video** control opens this recording instead of the live Azure deployment. This prepares service retirement; it does not assert that the Azure subscription has been cancelled. The historical navigation checks below describe the earlier live-link configuration.
+[Download the retained Azure video](cloud-browser-20260919.webm). This historical recording uses the earlier dark interface. The public dashboard now links to the [current front-end walkthrough](https://younes-alaoui-ismaili.github.io/Industrial-telemetry-dashboard/frontend-demo.webm), a separate browser-simulator recording. Neither publishing a recording nor replacing that link cancels the Azure subscription. The historical navigation checks below describe the earlier live-link configuration.
 
 ## Browser recording and recheck, September 19
 

@@ -1,0 +1,29 @@
+{
+  "recordedDate": "2026-09-20",
+  "interface": "Current light industrial React frontend",
+  "source": "Local production build using autonomous browser simulator",
+  "sourceBaseCommit": "e72d9cbaeb9c47731a49e2ab1174deb6cdd0c95c",
+  "buildChanges": "Demo video label and URL; same monitoring workspace",
+  "measurements": "Synthetic browser simulator, no physical sensors, SQL or Azure",
+  "method": "Browser CDP screencast JPEG frames encoded to WebM at 25 fps; idle gaps over four seconds shortened; no generated UI frames; silent",
+  "sourceFrames": 73,
+  "captureSeconds": 79.69767904281616,
+  "editedSeconds": 59.76376819610596,
+  "sha256": "d887977fc20afa5cca13b6ed7650e604d076a6f206ffdfb6363cd73d5c81941a",
+  "scenes": [
+    "Healthy equipment overview",
+    "PRESS-01 fault and unacknowledged temperature alarm",
+    "PRESS-01 faceplate with threshold trends",
+    "Alarm acknowledgement",
+    "Fleet temperature and vibration history",
+    "Return to normal with no open alarms"
+  ],
+  "playbackVerification": {
+    "currentTime": 59.84,
+    "duration": 59.84,
+    "ended": true,
+    "error": null,
+    "height": 900,
+    "width": 1600
+  }
+}

@@ -33,10 +33,10 @@ jobs:
       - name: Build
         run: |
           npm run build
-          cp evidence/azure/cloud-browser-20260919.webm dist/cloud-proof.webm
-          cmp evidence/azure/cloud-browser-20260919.webm dist/cloud-proof.webm
+          cp evidence/local/frontend-walkthrough-20260920.webm dist/frontend-demo.webm
+          cmp evidence/local/frontend-walkthrough-20260920.webm dist/frontend-demo.webm
         env:
-          VITE_CLOUD_EVIDENCE_URL: ./cloud-proof.webm
+          VITE_DEMO_VIDEO_URL: ./frontend-demo.webm
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3

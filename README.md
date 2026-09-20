@@ -4,6 +4,8 @@
 
 **Public industrial workspace:** the [interactive demo](https://younes-alaoui-ismaili.github.io/Industrial-telemetry-dashboard/) now presents a searchable equipment table, alarms and fleet temperature/vibration history. The simulator runs entirely in the browser and does not require Azure, a ThingsBoard server or sign-in. Data is synthetic and labelled on screen.
 
+[Watch the current front-end demonstration](https://younes-alaoui-ismaili.github.io/Industrial-telemetry-dashboard/frontend-demo.webm): the light industrial workspace, fault injection, machine details, acknowledgement and fleet history. Recorded from a local production build with the browser simulator, without Azure or SQL. Silent; long idle gaps shortened. [Recording provenance](evidence/local/frontend-walkthrough-20260920.json).
+
 **Local ThingsBoard edition:** a native ThingsBoard dashboard with equipment, temperature/vibration history and imported Azure alarm states is available through the [local installation and operating guide](infra/thingsboard/README.md). It uses a retained copy of synthetic Azure measurements with original timestamps; it does not require continuous Azure polling or replace the public React demo.
 
 [Watch the local ThingsBoard walkthrough](evidence/local/thingsboard-walkthrough-20260920.webm): equipment overview, temperature and vibration peaks, and alarm details. Silent browser capture, about 59 seconds, with idle gaps shortened. Historical synthetic data copied from Azure; no live cloud acquisition or alarm acknowledgement in this recording. [Recording provenance](evidence/local/thingsboard-walkthrough-20260920.json).
@@ -30,7 +32,7 @@ Eight machines report temperature, vibration, pressure, speed and cycle counts. 
 
 A selector in the header chooses where the readings come from.
 
-- **Cloud video** on GitHub Pages opens the [recorded Azure demonstration](https://younes-alaoui-ismaili.github.io/Industrial-telemetry-dashboard/cloud-proof.webm), served by Pages from the retained GitHub video. This is recorded synthetic telemetry, not a live connection; no Azure account or running Azure service is required. On Azure or a local API deployment, it selects the authenticated API with SQL persistence. The screen distinguishes a local API from Azure and shows unavailable on source failure. [Setup and limits](docs/persistent-telemetry.md).
+- **Demo video** on GitHub Pages opens the [current front-end walkthrough](https://younes-alaoui-ismaili.github.io/Industrial-telemetry-dashboard/frontend-demo.webm). This shows the same light interface with synthetic browser data. It is a recording, not a live cloud connection. The [older Azure proof](evidence/azure/README.md) remains separately archived. On Azure or a local API deployment, the Cloud radio selects the authenticated persistent API. [Setup and limits](docs/persistent-telemetry.md).
 - **Simulated** (default). The built in simulator. Nothing to install, nothing to configure, and it is what the live demo above runs on.
 - **MCP live**. Real readings from a telemetry [MCP](https://modelcontextprotocol.io) server, reached through a small local bridge. The dashboard calls the server's own tools: `list_devices`, `get_telemetry`, `get_anomalies` and `simulate_fault`. Alarms in this mode are the ones the server detected, carrying the threshold the server itself crossed. Injecting a fault sends `simulate_fault` to the server and the readings move because the server moved them.
 
@@ -73,7 +75,7 @@ The public React workspace adapts the organization of the [ThingsBoard thermosta
 
 ## Features
 
-- **Three source paths**: the browser simulator, a local telemetry MCP bridge, and an authenticated persistent API. GitHub Pages offers the recorded Cloud video instead of an Azure connection.
+- **Three source paths**: the browser simulator, a local telemetry MCP bridge, and an authenticated persistent API. GitHub Pages offers a recorded walkthrough of the current frontend instead of an Azure connection.
 - **Equipment table**: eight simulated machines with plant tags, search, state, temperature/vibration readings, units and update times.
 - **Asset faceplate**: click any machine for a dialog over the running screen, carrying a full trend for every metric it has with its warning and alarm limits, plus that machine's alarms. The table stays an overview; nothing about one machine is left unreachable.
 - **Fleet history**: temperature and vibration charts compare all available equipment, with min/max/latest statistics independent of the search filter.

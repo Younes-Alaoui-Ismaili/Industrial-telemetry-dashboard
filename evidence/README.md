@@ -1,8 +1,12 @@
-# Local acceptance evidence
+# Demonstration and acceptance evidence
 
-These recordings use synthetic measurements, a real local SQL Server Developer database, a Fastify API and a real Edge browser. They are personal demonstrations, not customer or production deployments. These local recordings are distinct from the [actual Azure execution records](azure/README.md), which document the separate cloud journey and its remaining recording limits.
+The API acceptance recordings below use synthetic measurements, a real local SQL Server Developer database, a Fastify API and a real Edge browser. They are personal demonstrations, not customer or production deployments. These local recordings are distinct from the [actual Azure execution records](azure/README.md), which document the separate cloud journey and its remaining recording limits.
 
-## Recorded paths
+## Current front-end walkthrough
+
+[Play the current front-end demo](https://younes-alaoui-ismaili.github.io/Industrial-telemetry-dashboard/frontend-demo.webm), [retained file](local/frontend-walkthrough-20260920.webm), [provenance](local/frontend-walkthrough-20260920.json). This recording shows the light industrial interface: equipment overview, PRESS-01 fault, machine details, acknowledgement, temperature/vibration history and return to normal. It runs only the browser simulator from a local production build. No SQL, Azure or physical sensors are used in this video. Original captured screens; silent; idle gaps over four seconds shortened.
+
+## Recorded API paths
 
 - [Operator view](local/dashboard-operator.png) and [Reader view](local/dashboard-reader.png).
 - [Role and acknowledgement recording](local/roles-and-acknowledgement.webm), with [machine-readable assertions](local/roles-and-acknowledgement.json). The packaged application serves both UI and API on the same local origin. An HTTP 200 acknowledgement survives reload and is observed from a second Reader session. Reader has no acknowledgement control.

@@ -4,9 +4,9 @@ This extension connects the dashboard to a Fastify API and SQL Server. All measu
 
 ## Local setup
 
-The GitHub Pages workflow sets `VITE_CLOUD_EVIDENCE_URL=./cloud-proof.webm` and copies the retained `evidence/azure/cloud-browser-20260919.webm` into the Pages artifact. It checks that the copy is byte-identical. The public control is labelled **Cloud video** and opens the recorded demonstration, not Azure. Old `?source=cloud` links keep the simulator active without requesting an API. The recording remains usable after Azure is closed; this change does not cancel the subscription.
+The GitHub Pages workflow sets `VITE_DEMO_VIDEO_URL=./frontend-demo.webm` and copies the retained `evidence/local/frontend-walkthrough-20260920.webm` into the Pages artifact. It checks that the copy is byte-identical. The public control is labelled **Demo video** and opens a recording of the current light interface running on the browser simulator. It does not represent Azure execution. Old `?source=cloud` links keep the simulator active without requesting an API. The recording remains usable after Azure is closed; this change does not cancel the subscription.
 
-Leave both `VITE_CLOUD_EVIDENCE_URL` and `VITE_CLOUD_DASHBOARD_URL` unset for local API and Azure builds so Cloud uses the same-origin API and Microsoft login route. The older `VITE_CLOUD_DASHBOARD_URL` navigation option remains supported for separately configured deployments. When both URLs are set, recorded evidence takes precedence. These variables are public navigation URLs, not credentials.
+Leave both `VITE_DEMO_VIDEO_URL` and `VITE_CLOUD_DASHBOARD_URL` unset for local API and Azure builds so Cloud uses the same-origin API and Microsoft login route. The older `VITE_CLOUD_DASHBOARD_URL` navigation option remains supported for separately configured deployments. When both URLs are set, recorded evidence takes precedence. These variables are public navigation URLs, not credentials.
 
 Use Node.js 22 and SQL Server 2022 Developer in Docker. Install the frontend and API independently:
 
