@@ -4,9 +4,14 @@ This extension connects the dashboard to a Fastify API and SQL Server. All measu
 
 ## Local setup
 
-The GitHub Pages workflow sets `VITE_DEMO_VIDEO_URL=./frontend-demo.webm?v=scenario-en-20260920` and copies the retained `evidence/local/frontend-scenario-20260920.webm` into the Pages artifact. It checks that the copy is byte-identical. The public control is labelled **Demo video** and opens a 30-second captioned operator scenario of the current light interface running on the browser simulator, with explicitly marked x3/x4 acceleration. It does not represent Azure execution. Old `?source=cloud` links keep the simulator active without requesting an API. The recording remains usable after Azure is closed; this change does not cancel the subscription.
+The GitHub Pages workflow configures two public navigation URLs and copies both retained videos into its artifact, with byte-identity checks:
 
-Leave both `VITE_DEMO_VIDEO_URL` and `VITE_CLOUD_DASHBOARD_URL` unset for local API and Azure builds so Cloud uses the same-origin API and Microsoft login route. The older `VITE_CLOUD_DASHBOARD_URL` navigation option remains supported for separately configured deployments. When both URLs are set, recorded evidence takes precedence. These variables are public navigation URLs, not credentials.
+- `VITE_AZURE_PROOF_VIDEO_URL=./azure-proof.webm?v=azure-20260920`: **Azure proof**, the actual App Service and SQL recording with synthetic measurements. Source: `evidence/azure/azure-frontend-20260920.webm`.
+- `VITE_DEMO_VIDEO_URL=./frontend-demo.webm?v=scenario-en-20260920`: **Frontend demo**, the separate browser-simulator recording. Source: `evidence/local/frontend-scenario-20260920.webm`.
+
+Old `?source=cloud` links keep the simulator active without requesting an API when either recording URL is configured. The recordings remain usable after Azure is closed. Publishing them does not cancel the subscription.
+
+Leave `VITE_AZURE_PROOF_VIDEO_URL`, `VITE_DEMO_VIDEO_URL` and `VITE_CLOUD_DASHBOARD_URL` unset for local API and Azure builds so Cloud uses the same-origin API and Microsoft login route. The older live navigation option remains supported. Recordings take precedence over the live URL. These variables are public navigation URLs, not credentials.
 
 Use Node.js 22 and SQL Server 2022 Developer in Docker. Install the frontend and API independently:
 

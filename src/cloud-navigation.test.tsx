@@ -1,9 +1,15 @@
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import App from './App';
 import { SourceSelector } from './components/Dashboard/SourceSelector';
 
 const azureUrl = 'https://telemetry-proof-yai-20260909-us.azurewebsites.net/?source=cloud';
+
+beforeEach(() => {
+  vi.stubEnv('VITE_AZURE_PROOF_VIDEO_URL', '');
+  vi.stubEnv('VITE_DEMO_VIDEO_URL', '');
+  vi.stubEnv('VITE_CLOUD_DASHBOARD_URL', '');
+});
 
 afterEach(() => {
   cleanup();

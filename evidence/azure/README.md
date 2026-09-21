@@ -2,9 +2,21 @@
 
 These records come from an actual App Service application and Azure SQL database. Measurements are synthetic, produced by a finite MCP scenario. This is a personal demonstration, with no customer or production deployment claim. Inference runs on the local workstation, not in Azure.
 
+## New frontend on real Azure, September 20
+
+[Play Azure proof](https://younes-alaoui-ismaili.github.io/Industrial-telemetry-dashboard/azure-proof.webm?v=azure-20260920), [retained video](azure-frontend-20260920.webm), [sanitized verification and provenance](azure-frontend-20260920.json).
+
+The 45.72-second English film shows the new light frontend connected to Azure with Operator access and SQL history visible from the start. A finite 90-cycle publisher creates 360 measurements, including a 40-second PRESS-01 overheat starting at cycle 20. The threshold is inspected, the active alarm is acknowledged in the browser, the process returns to normal and the page is reloaded. Inspection, acknowledgement and the reload click run at normal speed. Only waiting sections are marked SPEED x3. Captions occupy a separate strip; empty capture padding is cropped. The source consists of actual browser screenshots, not generated UI. Unrecorded waits are cut and listed in the metadata.
+
+The application log matches the recorded acknowledgement to HTTP 200. A separate Operator API session reads the same saved alarm after reload: `724ad7e4-51a1-4254-b15b-e6600f5ad7b5`, acknowledgement timestamp `1789950775515`. All 360 scenario event identifiers are found through the SQL-backed API, and all six pre-existing alarm states are unchanged. The older returned, unacknowledged temperature alarm visible in the film is intentionally preserved.
+
+**Current Reader limitation:** both available authentication sessions carry Operator privileges. This run does not revalidate Reader-only reads or Reader write denial. The September 10 checks below remain historical evidence, not new acceptance results. No application role was changed for this run.
+
+Anonymous API access returned 401; authenticated health returned 200 with `deployment=azure`. Spending protections were rechecked at 2026-09-21 00:07 UTC: active free trial, spending limit On, F1 plans, SQL free limit and AutoPause. No paid upgrade, new Azure resource or subscription cancellation was performed. The previous deployment package was retained. The new release adds bounded retries for transient initial SQL connection failures; it does not retry writes. Earlier browser request aborts are documented as a limitation, and permanent availability is not claimed.
+
 ## Historical Azure recording
 
-[Download the retained Azure video](cloud-browser-20260919.webm). This historical recording uses the earlier dark interface. The public dashboard now links to the [current front-end walkthrough](https://younes-alaoui-ismaili.github.io/Industrial-telemetry-dashboard/frontend-demo.webm), a separate browser-simulator recording. Neither publishing a recording nor replacing that link cancels the Azure subscription. The historical navigation checks below describe the earlier live-link configuration.
+[Download the retained Azure video](cloud-browser-20260919.webm). This historical recording uses the earlier dark interface. The public dashboard keeps the separate [current front-end walkthrough](https://younes-alaoui-ismaili.github.io/Industrial-telemetry-dashboard/frontend-demo.webm), a separate browser-simulator recording. Neither publishing a recording nor replacing that link cancels the Azure subscription. The historical navigation checks below describe the earlier live-link configuration.
 
 ## Browser recording and recheck, September 19
 

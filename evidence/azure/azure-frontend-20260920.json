@@ -1,0 +1,247 @@
+{
+  "recordedOn": "2026-09-20",
+  "timezone": "America/Toronto",
+  "utcDate": "2026-09-21",
+  "description": "Actual Azure App Service and Azure SQL, new light frontend, authenticated Operator; synthetic measurements.",
+  "sourceUrl": "https://telemetry-proof-yai-20260909-us.azurewebsites.net/?source=cloud",
+  "deployment": {
+    "asset": "index-B_jbLVjU.js",
+    "sha256": "e2a299f4693428ff2aa27d4dfedb98c090497da21a1045fe537297ad64f9fa56",
+    "sourceRevision": "1d260855228b11ac47f362c6dff65c0c9733f5fe",
+    "deploymentId": "1e20df5a-6b0f-4e6d-8fd9-0f2566a1be2a"
+  },
+  "producer": {
+    "repository": "https://github.com/Younes-Alaoui-Ismaili/mcp-live-telemetry",
+    "commit": "c5d54dc2188e3c9fd5f56b85999f96802258196a",
+    "profile": "azure-video",
+    "ticks": 90,
+    "intervalMs": 1000,
+    "intervalMeaning": "Delay after each accepted HTTP batch; total duration includes network time.",
+    "fault": {
+      "device": "press-01",
+      "metric": "temperature",
+      "startsAtTick": 20,
+      "durationMs": 40000
+    }
+  },
+  "video": {
+    "file": "azure-frontend-20260920.webm",
+    "sha256": "b73d4fdceee86cc9d3bede86b0e57c4c1fd30e7f50ca55d99df642de94d23aba",
+    "bytes": 2836412,
+    "seconds": 45.72,
+    "width": 1280,
+    "height": 1000,
+    "fps": 25,
+    "audio": false,
+    "language": "en",
+    "sourceFrameCount": 240,
+    "capture": "Actual browser screenshots sampled approximately four times per second, resampled at 25 fps. No generated interface or fabricated API response.",
+    "editing": "Empty browser capture padding removed from the right and bottom; UI content unchanged",
+    "segments": [
+      {
+        "name": "overview",
+        "sourceStart": 1789950714.093,
+        "sourceEnd": 1789950719.249,
+        "speed": 1,
+        "outputStart": 0,
+        "outputEnd": 5.16,
+        "title": "Azure connected: SQL history is already visible"
+      },
+      {
+        "name": "wait_alarm",
+        "sourceStart": 1789950749.202,
+        "sourceEnd": 1789950763.705,
+        "speed": 3,
+        "outputStart": 5.16,
+        "outputEnd": 10.0,
+        "title": "Receive new telemetry from the finite publisher"
+      },
+      {
+        "name": "alarm",
+        "sourceStart": 1789950763.705,
+        "sourceEnd": 1789950767.388,
+        "speed": 1,
+        "outputStart": 10.0,
+        "outputEnd": 13.68,
+        "title": "PRESS-01 overheats: a new SQL alarm appears"
+      },
+      {
+        "name": "inspect",
+        "sourceStart": 1789950767.388,
+        "sourceEnd": 1789950775.329,
+        "speed": 1,
+        "outputStart": 13.68,
+        "outputEnd": 21.64,
+        "title": "Inspect the temperature and its 77 C alarm threshold"
+      },
+      {
+        "name": "acknowledge",
+        "sourceStart": 1789950775.329,
+        "sourceEnd": 1789950782.17,
+        "speed": 1,
+        "outputStart": 21.64,
+        "outputEnd": 28.48,
+        "title": "Operator acknowledges the active alarm in Azure"
+      },
+      {
+        "name": "recovery",
+        "sourceStart": 1789950796.922,
+        "sourceEnd": 1789950803.135,
+        "speed": 3,
+        "outputStart": 28.48,
+        "outputEnd": 30.560000000000002,
+        "title": "Wait for the synthetic overheat to end"
+      },
+      {
+        "name": "normal",
+        "sourceStart": 1789950803.135,
+        "sourceEnd": 1789950809.313,
+        "speed": 1,
+        "outputStart": 30.560000000000002,
+        "outputEnd": 36.72,
+        "title": "New alarm cleared and acknowledged; older history retained"
+      },
+      {
+        "name": "reload_click",
+        "sourceStart": 1789950809.313,
+        "sourceEnd": 1789950809.9129999,
+        "speed": 1,
+        "outputStart": 36.72,
+        "outputEnd": 37.32,
+        "title": "Reload the Azure application"
+      },
+      {
+        "name": "reload",
+        "sourceStart": 1789950809.9129999,
+        "sourceEnd": 1789950816.717,
+        "speed": 3,
+        "outputStart": 37.32,
+        "outputEnd": 39.6,
+        "title": "Read the saved state from SQL after reload"
+      },
+      {
+        "name": "persisted",
+        "sourceStart": 1789950816.717,
+        "sourceEnd": 1789950822.843,
+        "speed": 1,
+        "outputStart": 39.6,
+        "outputEnd": 45.72,
+        "title": "After reload: the saved acknowledgement is retained"
+      }
+    ],
+    "omittedIntervals": [
+      {
+        "start": 1789950719.249,
+        "end": 1789950749.202,
+        "reason": "Publisher setup between capture sections"
+      },
+      {
+        "start": 1789950782.17,
+        "end": 1789950796.922,
+        "reason": "Unrecorded wait before recovery"
+      }
+    ],
+    "localPlayback": {
+      "currentTime": 45.72,
+      "duration": 45.72,
+      "ended": true,
+      "error": null,
+      "height": 1000,
+      "paused": true,
+      "width": 1280
+    }
+  },
+  "verification": {
+    "healthStatus": 200,
+    "priorAlarmsUnchanged": true,
+    "checkedAt": "2026-09-21T00:36:19.0564654Z",
+    "readerOnlyCheck": "Not reverified in this run: both available sessions carry the Operator role. The retained September 10 Reader checks are historical.",
+    "independentReadRole": "Operator",
+    "anonymousStatus": 401,
+    "newAlarm": {
+      "id": "724ad7e4-51a1-4254-b15b-e6600f5ad7b5",
+      "device_id": "press-01",
+      "metric": "temperature",
+      "threshold": 77,
+      "raised_at": 1789950761800,
+      "peak_value": 89.88,
+      "cleared_at": 1789950801883,
+      "acknowledged_at": 1789950775515
+    },
+    "scenario": {
+      "run": "2ca26a62-43e4-44be-accd-e3addea50c69",
+      "accepted": 360,
+      "ticks": 90,
+      "profile": "azure-video",
+      "provenance": "simulated",
+      "source": "finite local simulator scenario"
+    },
+    "sqlEventCounts": {
+      "press-01": 90,
+      "pump-04": 90,
+      "spindle-02": 90,
+      "conveyor-03": 90
+    },
+    "health": {
+      "status": "ready",
+      "deployment": "azure",
+      "provenance": "simulated",
+      "role": "Operator"
+    },
+    "priorAlarmCount": 6,
+    "browserAcknowledgement": {
+      "method": "POST",
+      "path": "/api/v1/alarms/724ad7e4-51a1-4254-b15b-e6600f5ad7b5/acknowledgements",
+      "status": 200,
+      "requestId": "req-1kc",
+      "requestTimestamp": 1789950775508,
+      "responseTimestamp": 1789950775525,
+      "evidence": "Matched incoming request and completed response in the Azure application log; browser action timestamp matches the recording."
+    }
+  },
+  "spendingProtections": {
+    "plans": [
+      {
+        "name": "telemetry-proof-yai-20260909-us-plan",
+        "tier": "F1"
+      },
+      {
+        "name": "telemetry-proof-yai-20260909-plan",
+        "tier": "F1"
+      }
+    ],
+    "database": {
+      "freeLimitExhaustionBehavior": "AutoPause",
+      "status": "Resuming",
+      "useFreeLimit": true
+    },
+    "subscription": {
+      "quota": "FreeTrial_2014-09-01",
+      "spendingLimit": "On",
+      "state": "Enabled"
+    },
+    "checkedAt": "2026-09-21T00:07:08.3177430Z"
+  },
+  "limitations": [
+    "Synthetic measurements, not physical industrial sensors.",
+    "Independent verification used a separate HTTP session with Operator privileges. A fresh Reader-only check remains outstanding; no claim that it passed in this run.",
+    "The UI hides alarms once they are both cleared and acknowledged. Persistence is confirmed by the separate API read and matched SQL event identifiers, not merely by an empty list.",
+    "One older returned, unacknowledged alarm remains visible and is preserved.",
+    "Earlier takes and existing SQL records were preserved. Intermittent browser request aborts occurred outside the retained take; continuous availability is not claimed.",
+    "The UI history joins successive samples across gaps between finite runs. It does not imply continuous acquisition.",
+    "The recording begins after sign-in and contains no credential entry. It is not a recording of Younes operating the application."
+  ],
+  "localValidation": {
+    "dashboardTests": 302,
+    "apiTests": 11,
+    "producerTests": 41,
+    "navigationTestsRepeatedWithPagesEnvironment": 8,
+    "lint": "passed",
+    "builds": [
+      "dashboard",
+      "API",
+      "producer"
+    ],
+    "githubPublication": "pending Reader-only acceptance check"
+  }
+}

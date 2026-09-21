@@ -35,7 +35,10 @@ jobs:
           npm run build
           cp evidence/local/frontend-scenario-20260920.webm dist/frontend-demo.webm
           cmp evidence/local/frontend-scenario-20260920.webm dist/frontend-demo.webm
+          cp evidence/azure/azure-frontend-20260920.webm dist/azure-proof.webm
+          cmp evidence/azure/azure-frontend-20260920.webm dist/azure-proof.webm
         env:
+          VITE_AZURE_PROOF_VIDEO_URL: ./azure-proof.webm?v=azure-20260920
           VITE_DEMO_VIDEO_URL: ./frontend-demo.webm?v=scenario-en-20260920
 
       - name: Upload Pages artifact
