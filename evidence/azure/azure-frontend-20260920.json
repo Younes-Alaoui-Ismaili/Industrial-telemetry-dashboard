@@ -155,8 +155,23 @@
     "healthStatus": 200,
     "priorAlarmsUnchanged": true,
     "checkedAt": "2026-09-21T00:36:19.0564654Z",
-    "readerOnlyCheck": "Not reverified in this run: both available sessions carry the Operator role. The retained September 10 Reader checks are historical.",
+    "readerOnlyCheck": "Passed with a fresh Reader-only token after temporarily removing Operator. Operator was restored and both assignments were verified afterward.",
     "independentReadRole": "Operator",
+    "readerAcceptance": {
+      "checkedAt": "2026-09-21T00:52:09.8793370Z",
+      "tokenRoles": [
+        "Reader"
+      ],
+      "healthStatus": 200,
+      "deployment": "azure",
+      "alarmReadStatus": 200,
+      "alarmId": "724ad7e4-51a1-4254-b15b-e6600f5ad7b5",
+      "acknowledgedAt": 1789950775515,
+      "clearedAt": 1789950801883,
+      "writeStatus": 403,
+      "writeError": "forbidden",
+      "operatorRestored": true
+    },
     "anonymousStatus": 401,
     "newAlarm": {
       "id": "724ad7e4-51a1-4254-b15b-e6600f5ad7b5",
@@ -224,7 +239,7 @@
   },
   "limitations": [
     "Synthetic measurements, not physical industrial sensors.",
-    "Independent verification used a separate HTTP session with Operator privileges. A fresh Reader-only check remains outstanding; no claim that it passed in this run.",
+    "Independent Operator and Reader HTTP sessions read the same saved alarm. The Reader-only session was obtained through a temporary role change that was reverted and verified.",
     "The UI hides alarms once they are both cleared and acknowledged. Persistence is confirmed by the separate API read and matched SQL event identifiers, not merely by an empty list.",
     "One older returned, unacknowledged alarm remains visible and is preserved.",
     "Earlier takes and existing SQL records were preserved. Intermittent browser request aborts occurred outside the retained take; continuous availability is not claimed.",
@@ -242,6 +257,6 @@
       "API",
       "producer"
     ],
-    "githubPublication": "pending Reader-only acceptance check"
+    "githubPublication": "pending push and remote workflow verification"
   }
 }

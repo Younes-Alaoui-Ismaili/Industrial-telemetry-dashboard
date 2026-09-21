@@ -4,7 +4,7 @@ The API acceptance recordings below use synthetic measurements, a real local SQL
 
 ## Current Azure proof
 
-[Play the new frontend on Azure](https://younes-alaoui-ismaili.github.io/Industrial-telemetry-dashboard/azure-proof.webm?v=azure-20260920), [retained file](azure/azure-frontend-20260920.webm), [verification](azure/azure-frontend-20260920.json). This 45.72-second English recording uses real Azure App Service authentication, API traffic and SQL storage with synthetic measurements. It shows an actual Operator acknowledgement and reload. A separate Operator read verifies persistence. A fresh Reader-only check remains outstanding; see the explicit limitation in the [Azure evidence index](azure/README.md).
+[Play the new frontend on Azure](https://younes-alaoui-ismaili.github.io/Industrial-telemetry-dashboard/azure-proof.webm?v=azure-20260920), [retained file](azure/azure-frontend-20260920.webm), [verification](azure/azure-frontend-20260920.json). This 45.72-second English recording uses real Azure App Service authentication, API traffic and SQL storage with synthetic measurements. It shows an actual Operator acknowledgement and reload. Separate Operator and Reader reads verify the same persisted acknowledgement; the Reader write attempt is refused with 403. See the [Azure evidence index](azure/README.md).
 
 ## Current front-end walkthrough
 
