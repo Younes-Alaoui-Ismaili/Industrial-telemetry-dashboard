@@ -10,7 +10,7 @@
     "dev": "tsx src/index.ts",
     "build": "tsc",
     "start": "node dist/index.js",
-    "test": "tsx --test test/api.test.ts",
+    "test": "tsx --test test/api.test.ts test/connect-retry.test.ts",
     "test:sql": "tsx --test --test-concurrency=1 test/store.test.ts test/window.test.ts test/report.test.ts",
     "migrate": "tsx src/admin.ts migrate",
     "backup": "tsx src/admin.ts backup",

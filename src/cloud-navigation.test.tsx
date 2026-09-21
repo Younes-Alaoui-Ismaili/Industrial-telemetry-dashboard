@@ -62,7 +62,7 @@ describe('Archived Cloud evidence', () => {
     vi.stubEnv('VITE_CLOUD_DASHBOARD_URL', azureUrl);
     const onChange = vi.fn();
     render(<SourceSelector value="simulated" onChange={onChange} />);
-    const link = screen.getByRole('link', { name: 'Demo video' });
+    const link = screen.getByRole('link', { name: 'Frontend demo' });
     expect(link).toHaveAttribute('href', './frontend-demo.webm');
     expect(link).toHaveAttribute('title', expect.stringContaining('Recorded'));
     expect(screen.queryByRole('link', { name: 'Cloud' })).not.toBeInTheDocument();
@@ -77,7 +77,7 @@ describe('Archived Cloud evidence', () => {
     vi.stubGlobal('fetch', fetch);
     render(<App />);
     expect(screen.getByRole('radio', { name: 'Simulated' })).toBeChecked();
-    expect(screen.getByRole('link', { name: 'Demo video' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Frontend demo' })).toBeInTheDocument();
     expect(fetch).not.toHaveBeenCalled();
   });
 });

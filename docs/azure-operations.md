@@ -79,6 +79,8 @@ This operation is an export/import recovery. It is not Azure point-in-time resto
 
 Fastify writes structured request logs with request IDs. Authorization and cookie headers are redacted; SQL details are not returned to callers. Use the built-in App Service log stream and metrics to observe response failures and resource usage, without adding a paid collector. Logs can contain user identifiers in audit data; demonstrations use dedicated accounts.
 
+Initial SQL connection establishment retries transient connection failures up to four attempts, waiting 5, 10 and 20 seconds between attempts. Each failed pool is closed. Authentication errors are not retried; application transactions and writes are never replayed by this startup policy. See [Azure SQL transient connection guidance](https://learn.microsoft.com/en-us/azure/azure-sql/database/troubleshoot-common-connectivity-issues?view=azuresql). A paused database can still take time to resume; readiness must be verified before recording.
+
 The public /healthz endpoint proves process liveness. Authenticated /api/v1/health checks SQL readiness. A stopped free database or suspended trial must remain visibly unavailable.
 
 Before the trial ends, keep the recorded demo, revision, resource settings and recovery proof. No permanent cloud availability is promised. Any resource deletion is a separate approved operation; do not run a broad cleanup against a shared subscription.

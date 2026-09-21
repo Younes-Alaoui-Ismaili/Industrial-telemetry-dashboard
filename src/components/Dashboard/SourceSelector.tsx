@@ -8,6 +8,7 @@
  */
 
 import type { DataSourceId } from '../../types/mcp';
+import { Fragment } from 'react';
 
 const OPTIONS: { id: DataSourceId; label: string; hint: string }[] = [
   { id: 'simulated', label: 'Simulated', hint: 'Built in simulator, no setup required' },
@@ -27,19 +28,29 @@ interface SourceSelectorProps {
 
 export function SourceSelector({ value, onChange }: SourceSelectorProps) {
   const demoVideoUrl = import.meta.env.VITE_DEMO_VIDEO_URL;
+  const azureProofUrl = import.meta.env.VITE_AZURE_PROOF_VIDEO_URL;
   const cloudDashboardUrl = import.meta.env.VITE_CLOUD_DASHBOARD_URL;
   return (
     <fieldset className="flex flex-col gap-0.5">
       <legend className="text-[10px] uppercase tracking-wider text-hmi-muted">Data source</legend>
       <div className="flex flex-wrap border border-hmi-grid">
         {OPTIONS.map((option) => {
-          if (option.id === 'cloud' && (demoVideoUrl || cloudDashboardUrl)) {
+          if (option.id === 'cloud' && (azureProofUrl || demoVideoUrl)) {
+            const recordings = [
+              { url: azureProofUrl, label: 'Azure proof', title: 'Recorded Azure App Service and SQL test with synthetic telemetry. No live cloud connection.' },
+              { url: demoVideoUrl, label: 'Frontend demo', title: 'Recorded browser simulator walkthrough. No live cloud connection.' },
+            ];
+            return <Fragment key={option.id}>{recordings.filter(recording => recording.url).map(recording => <a key={recording.label} href={recording.url} title={recording.title}
+              className="block border-r border-hmi-grid px-3 py-1 font-mono text-xs uppercase tracking-wide text-hmi-secondary last:border-r-0 focus-visible:ring-1 focus-visible:ring-hmi-secondary"
+            >{recording.label}</a>)}</Fragment>;
+          }
+          if (option.id === 'cloud' && cloudDashboardUrl) {
             return <a
               key={option.id}
-              href={demoVideoUrl || cloudDashboardUrl}
-              title={demoVideoUrl ? 'Recorded walkthrough of this dashboard with synthetic measurements. No live cloud connection.' : 'Open the Azure dashboard. Microsoft sign-in required.'}
+              href={cloudDashboardUrl}
+              title="Open the Azure dashboard. Microsoft sign-in required."
               className="block border-r border-hmi-grid px-3 py-1 font-mono text-xs uppercase tracking-wide text-hmi-secondary last:border-r-0 focus-visible:ring-1 focus-visible:ring-hmi-secondary"
-            >{demoVideoUrl ? 'Demo video' : 'Cloud'}</a>;
+            >Cloud</a>;
           }
           const selected = option.id === value;
           return (

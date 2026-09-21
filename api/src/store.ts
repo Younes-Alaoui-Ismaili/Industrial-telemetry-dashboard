@@ -3,6 +3,7 @@ import { createHash, randomUUID } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { DomainError, type AlarmRecord, type Device, type Measurement, type TelemetryStore } from './types.js';
+import { connectWithRetry } from './connect-retry.js';
 
 type Scope = sql.ConnectionPool | sql.Transaction;
 type Row = Record<string, unknown>;
@@ -29,9 +30,11 @@ function hash(value: unknown) { return createHash('sha256').update(JSON.stringif
 export class SqlStore implements TelemetryStore {
   private constructor(private pool: sql.ConnectionPool) {}
   static async connect(connection: string | sql.config) {
-    const pool = new sql.ConnectionPool(connection);
-    pool.on('error', () => console.warn(JSON.stringify({ level: 'warn', code: 'sql_pool_error', message: 'SQL connection unavailable' })));
-    await pool.connect();
+    const pool = await connectWithRetry(() => {
+      const candidate = new sql.ConnectionPool(connection);
+      candidate.on('error', () => console.warn(JSON.stringify({ level: 'warn', code: 'sql_pool_error', message: 'SQL connection unavailable' })));
+      return candidate;
+    });
     return new SqlStore(pool);
   }
   async close() { await this.pool.close(); }
