@@ -257,6 +257,20 @@
       "API",
       "producer"
     ],
-    "githubPublication": "pending push and remote workflow verification"
+    "githubPublication": {
+      "commit": "9d7121835518871fd48e775cec3e9a54910f40ca",
+      "ciRun": "https://github.com/Younes-Alaoui-Ismaili/Industrial-telemetry-dashboard/actions/runs/35549102364",
+      "pagesRun": "https://github.com/Younes-Alaoui-Ismaili/Industrial-telemetry-dashboard/actions/runs/35549102312",
+      "status": "passed",
+      "publicUrl": "https://younes-alaoui-ismaili.github.io/Industrial-telemetry-dashboard/azure-proof.webm?v=azure-20260920",
+      "publicSha256": "b73d4fdceee86cc9d3bede86b0e57c4c1fd30e7f50ca55d99df642de94d23aba",
+      "publicPlayback": {
+        "duration": 45.72,
+        "ended": true,
+        "error": null,
+        "width": 1280,
+        "height": 1000
+      }
+    }
   }
 }
